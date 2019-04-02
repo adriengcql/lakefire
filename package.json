@@ -8,8 +8,8 @@
     "prepublish": "npm run build",
     "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "webpack && node ./dev/server.js",
-    "dev": "browser-sync dev/public -w | nodemon"
+    "start": "webpack && node ./dev",
+    "dev": "browser-sync start --proxy localhost:9000 --files dev/public | nodemon"
   },
   "repository": {
     "type": "git",
@@ -41,13 +41,19 @@
     "webpack": "^4.29.6",
     "webpack-cli": "^3.3.0"
   },
-  "dependencies": {},
+  "dependencies": {
+    "@types/mongoose": "^5.3.24",
+    "mongoose": "^5.4.20",
+    "rxjs": "^6.4.0",
+    "socket.io": "^2.2.0",
+    "ws": "^6.2.1"
+  },
   "nodemonConfig": {
-    "ext": "ts lkf",
+    "ext": "js ts lkf",
     "ignore": [
       "dev/public/*",
       "dist/*"
     ],
-    "exec": "webpack"
+    "exec": "start cmd.exe /c \"webpack && exit\" && node ./dev"
   }
 }

@@ -17,6 +17,7 @@ export enum NodeType {
     ALIGN = 'align',
     CONTAINER = 'container',
     HTML = 'html',
+    DATA = 'data',
 }
 
 export class LNode {
@@ -126,6 +127,8 @@ class Parser {
                 return this.parseLayout();
             case TokenType.HTML:
                 return this.parseHTML();
+            case TokenType.IDENTIFIER:
+                return this.parseIdentifier();
             default:
                 this.error('INVALID_TOKEN', 'unexpected token "' + this.peek().type + '"', this.peek());
         }
@@ -186,7 +189,16 @@ class Parser {
 
     parseHTML() {
         const tok = this.expect(TokenType.HTML)
-        console.log(tok)
         return new LNode(NodeType.HTML, { content: tok.value })
+    }
+
+    parseIdentifier() {
+        const tok = this.expect(TokenType.IDENTIFIER);
+        const keys = [tok.value];
+        while (this.accept(TokenType.OPERATOR)) {
+            const t = this.expect(TokenType.IDENTIFIER)
+            keys.push(t.value)
+        }
+        return new LNode(NodeType.DATA, { keys })
     }
 };

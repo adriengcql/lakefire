@@ -1,5 +1,5 @@
-import { parse, LNode, NodeType } from './parser'
-
+import { parse, LNode, NodeType } from './parser';
+import { fetch } from './services';
 
 const colors: string[] = ['aqua', 'blue', 'fuchsia', 'gray', 'green',
     'lime', 'maroon', 'navy', 'olive', 'orange', 'purple', 'red',
@@ -22,8 +22,15 @@ function renderNode(node: LNode): HTMLElement {
     div.style.background = nextColor();
     const opts = node.options;
     switch (node.type) {
+        case NodeType.DATA:
+            fetch(opts.keys).subscribe(
+                data => { div.innerText = data.toString() },
+                err => { console.log(err) }
+            )
+            break;
         case NodeType.HTML:
             div.innerHTML = opts.content;
+            break;
         case NodeType.CONTAINER:
             div.style.display = 'flex';
             div.style.flexDirection = opts.vertical ? 'column' : 'row';
