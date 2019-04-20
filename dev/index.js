@@ -1,4 +1,5 @@
 const express = require('express');
+const fs = require('fs')
 
 const path = require('path');
 const database = require('./database');
@@ -7,6 +8,7 @@ const app = express();
 const server = require('http').createServer(app);
 const Websocket = require('ws')
 const wss = new Websocket.Server({ server })
+
 
 app.use(express.static(path.join(__dirname, '/public')));
 
@@ -20,21 +22,55 @@ const watcher = database.models.City.watch()
 wss.on('connection', function (socket) {
     console.log('new user connected');
     socket.json = function (data) { socket.send(JSON.stringify(data)) };
+    socket.error = function (err) { socket.send(JSON.stringify({ err })) }
     socket.on('message', function (msg) {
         console.log('request', msg)
-        let { keys, filters } = JSON.parse(msg)
-        filters = filters ? filters : {};
-        database.models.City.find(filters, function (err, data) {
-            socket.json(data)
-        })
-        watcher.on('change', (event) => {
-            if (event.operationType === 'insert') {
-                filters._id = event.fullDocument._id;
-                database.models.City.find(filters, function (err, data) {
-                    socket.json(data)
-                })
+        let { requestId, model, keys, filters, options } = JSON.parse(msg)
+        filters = filters || {}
+        const where = filters['where'] || {}
+        const collection = database.models[model]
+        if (!collection) {
+            socket.error('Wrong model')
+            return
+        }
+        if (options.one) {
+            let res;
+            collection.findOne(where, keys.join(' '), function (err, item) {
+                res = item;
+                socket.json({ requestId, item })
+            })
+
+            if (!options.noUpdate) {
+                watcher.on('change', (event) => {
+                    if (socket.readyState === 1 && event.operationType === 'insert') {
+                        collection.findOne(where, keys.join(' '), function (err, item) {
+                            if (item && item !== res) {
+                                socket.json({ requestId, item })
+                            }
+                        })
+                    }
+                });
             }
-        });
+
+        } else {
+
+            collection.find(where, keys.join(' '), function (err, items) {
+                socket.json({ requestId, items })
+            })
+
+            if (!options.noUpdate) {
+                watcher.on('change', (event) => {
+                    if (socket.readyState === 1 && event.operationType === 'insert') {
+                        where._id = event.fullDocument._id;
+                        collection.find(where, keys.join(' '), function (err, items) {
+                            if (items && !(Array.isArray(items) && !items.length)) {
+                                socket.json({ requestId, items })
+                            }
+                        })
+                    }
+                });
+            }
+        }
     });
 });
 

@@ -2,7 +2,7 @@ const path = require('path');
 
 module.exports = {
     mode: 'development',
-    entry: './src/index.ts',
+    entry: './test/app/index.ts',
     devtool: 'inline-source-map',
     module: {
         rules: [
@@ -14,7 +14,7 @@ module.exports = {
             {
                 test: /\.lkf$/i,
                 use: 'raw-loader',
-            },
+            }
         ]
     },
     resolve: {

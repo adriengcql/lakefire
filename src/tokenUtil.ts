@@ -1,9 +1,12 @@
+import { listenerCount } from "cluster";
+
 export enum TokenType {
-    EOF = 'eof',
-    NEWLINE = 'newline',
-    WHITESPACE = 'whitespace',
+    CONTAINER = 'meta.container.lkf',
+    TAG = 'meta.tag.lkf',
+    JAVASCRIPT = 'meta.embedded.block.js',
+    PARAMETER = 'variable.parameter.lkf',
     COMMENT = 'comment',
-    NUMBER = 'number',
+    NUMBER = 'constant.numeric.lkf',
     STRING = 'string',
     KEYWORD = 'keyword',
     IDENTIFIER = 'identifier',
@@ -11,69 +14,61 @@ export enum TokenType {
     OPERATOR = 'operator',
     LAYOUT = 'layout',
     INDENT = 'indent',
+    OBJECT = 'object',
     HTML = 'html',
 }
 
+
+export type TokenList = Array<{ line: number, type: TokenType, indent: number, tokens: Token[] }>
+
 export class Token {
+    line: number = 0
+    col: number = 0
+    value: string = ''
+    type: string = ''
+    scopes: string[] = []
 
-    col = 1;
-    line = 1;
-    ws = {
-        indent: 0,
-        before: 0,
-        after: 0,
-        trailing: 0
-    };
+    constructor(token: any = {}) {
+        this.line = token.line || 0
+        this.col = token.col || 0
+        this.value = token.value || ''
+        this.type = token.type || ''
+        this.scopes = token.scopes || []
+    }
 
-    type?: TokenType;
-    value?: any;
-    plain?: string;
-    operator?: any;
-
+    public toString(): string {
+        return `"${this.value.trim()}" of type "${this.type}" at (${this.line},${this.col})`
+    }
 }
 
+
 export class TokenStream {
-    private list: Token[] = [];
-    private tokenPos = -1;
+    private list: TokenList = []
+    private tokens: Token[] = []
+    private currentLine: number = 0;
+
+    public nextLine(): { line: number, type: TokenType, indent: number } | undefined {
+        const line = this.list.shift();
+        if (line) {
+            this.currentLine++
+            this.tokens = line.tokens;
+            return { line: line.line, type: line.type, indent: line.indent }
+        }
+        return undefined
+    }
 
     public peek(): Token {
-        return this.list[this.tokenPos + 1];
+        if (this.tokens.length) {
+            return new Token(this.tokens[0]);
+        }
+        return new Token({ line: this.currentLine })
     }
     public advance(): Token {
-        try {
-            return this.list[++this.tokenPos];
-        }
-        catch {
-            throw new Error('End of stream');
-        }
-    }
-    public lookahead(n: number) {
-        try {
-            return this.list[this.tokenPos + n];
-        }
-        catch {
-            throw new Error('End of stream');
-        }
-    }
-    public get(): Token {
-        return this.list[this.tokenPos];
-    }
-    public all(): Token[] {
-        return this.list;
-    }
-    public at(pos: number): Token {
-        try {
-            return this.list[pos];
-        }
-        catch {
-            return new Token();
-        }
-    }
-    public reset(): void {
-        this.tokenPos = 0;
+        return new Token(this.tokens.shift() || { line: this.currentLine });
+
     }
 
-    constructor(tokens: Token[]) {
+    constructor(tokens: TokenList) {
         this.list = tokens
     }
 }

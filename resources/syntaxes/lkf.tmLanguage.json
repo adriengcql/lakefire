@@ -1,0 +1,193 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "Lakefire",
+	"patterns": [
+		{
+			"include": "#javascript"
+		},
+		{
+			"include": "#keyword"
+		},
+		{
+			"include": "#string"
+		},
+		{
+			"include": "#container"
+		},
+		{
+			"include": "#tag"
+		}
+	],
+	"repository": {
+		"keyword": {
+			"patterns": [
+				{
+					"name": "keyword.control.lkf",
+					"match": "\\b(if|else|for|of)\\b"
+				}
+			]
+		},
+		"string": {
+			"patterns": [
+				{
+					"name": "string.quoted.double.lkf",
+					"begin": "\"",
+					"end": "\"",
+					"patterns": [
+						{
+							"include": "#escape"
+						}
+					]
+				},
+				{
+					"name": "string.quoted.single.lkf",
+					"begin": "'",
+					"end": "'",
+					"patterns": [
+						{
+							"include": "#escape"
+						}
+					]
+				}
+			]
+		},
+		"escape": {
+			"patterns": [
+				{
+					"name": "constant.character.escape.lkf",
+					"match": "\\\\."
+				}
+			]
+		},
+		"javascript": {
+			"begin": "\\s*-",
+			"end": "\\s*$",
+			"contentName": "meta.embedded.block.js",
+			"patterns": []
+		},
+		"inline-js": {
+			"begin": "\\{",
+			"end": "\\}",
+			"contentName": "meta.embedded.inline.js",
+			"patterns": []
+		},
+		"container": {
+			"patterns": [
+				{
+					"name": "meta.container.lkf",
+					"begin": "^\\s*(container)",
+					"end": "\\s*$",
+					"beginCaptures": {
+						"1": {
+							"name": "storage.type.container.lkf"
+						}
+					},
+					"patterns": [
+						{
+							"name": "variable.parameter.lkf",
+							"match": "\\b(left|center|right|top|middle|bottom|small|vertical)\\b"
+						},
+						{
+							"name": "meta.container.parameter.lkf",
+							"begin": "\\b(margin)\\b",
+							"end": "\\s(?!(\\s*\\d))",
+							"beginCaptures": {
+								"1": {
+									"name": "variable.parameter.lkf"
+								}
+							},
+							"patterns": [
+								{
+									"name": "constant.numeric.lkf",
+									"match": "\\b\\d+\\b"
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		"tag": {
+			"name": "meta.tag.lkf",
+			"begin": "^\\s*([\\w-]+)",
+			"end": "\\s*$",
+			"beginCaptures": {
+				"1": {
+					"patterns": [
+						{
+							"include": "#tag-name"
+						}
+					]
+				}
+			},
+			"patterns": [
+				{
+					"include": "#inline-js"
+				},
+				{
+					"name": "meta.tag.attributes.lkf",
+					"begin": "\\(",
+					"end": "\\)",
+					"patterns": [
+						{
+							"include": "#tag-attribute"
+						}
+					]
+				},
+				{
+					"name": "variable.parameter.lkf",
+					"match": "#([\\w-]+)\\b",
+					"captures": {
+						"1": {
+							"name": "meta.tag.id.lkf"
+						}
+					}
+				},
+				{
+					"name": "variable.parameter.lkf",
+					"match": "\\.([\\w-]+)\\b",
+					"captures": {
+						"1": {
+							"name": "meta.tag.class.lkf"
+						}
+					}
+				}
+			]
+		},
+		"tag-name": {
+			"patterns": [
+				{
+					"name": "storage.type.tag.lkf meta.tag.name.lkf",
+					"match": "\\b(a|abbr|address|area|article|aside|audio|b|bdi|bdo|blockquote|body|br|button|canvas|caption|cite|code|col|colgroup|command|datalist|dd|del|details|dfn|div|dl|dt|em|embed|fieldset|figcaption|figure|footer|form|h1|h2|h3|h4|h5|h6|header|hr|html|i|iframe|img|input|ins|kbd|keygen|label|legend|li|main|map|mark|menu|meter|nav|object|ol|optgroup|option|output|p|param|pre|progress|q|rp|rt|ruby|s|samp|section|select|small|source|span|strong|sub|summary|sup|table|tbody|td|textarea|tfoot|th|thead|time|tr|track|u|ul|var|video|wbr)\\b"
+				},
+				{
+					"name": "support.type.tag.lkf meta.tag.name.lkf",
+					"match": "\\b([\\w-]+)\\b"
+				}
+			]
+		},
+		"tag-attribute": {
+			"name": "meta.tag.attribute.lkf",
+			"begin": "\\b([\\w-]+)\\b",
+			"end": "(?=\\s*(\\w|\\)))",
+			"beginCaptures": {
+				"1": {
+					"name": "variable.parameter.lkf meta.tag.attribute.name.lkf"
+				}
+			},
+			"patterns": [
+				{
+					"begin": "\\s*=\\s*",
+					"end": "(?=\\s|\\))",
+					"contentName": "meta.tag.attribute.value.lkf",
+					"patterns": [
+						{
+							"include": "#inline-js"
+						}
+					]
+				}
+			]
+		}
+	},
+	"scopeName": "source.lkf"
+}

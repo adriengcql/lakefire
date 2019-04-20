@@ -3,23 +3,99 @@ import { Observable } from 'rxjs';
 
 const socket = new WebSocket('ws://localhost:9000');
 
-let requestStack: string[][] = [];
+const requestStack: any[] = [];
 
-let database: any[] = [];
+const queries: any[] = []
+const sentQueries = new Set()
+const queriesObs: QueryObs[] = []
 
-const dataObs = new Observable((observer) => {
+const database: { [model: string]: Collection } = {};
+
+interface IQuery {
+    model: string
+    keys: string[]
+    filters: any
+    options: any
+}
+
+class Collection {
+    private data: any = {};
+    model: string;
+
+    constructor(model: string) {
+        this.model = model;
+    }
+
+    public insert(obj: any) {
+
+    }
+
+    public insertMany(array: any[]) {
+        array.map((obj) => this.insert(obj))
+    }
+}
+
+class QueryObs extends Observable<any> {
+    requestId: number
+    constructor(requestId: number) {
+        super((observer) => {
+            socket.onmessage = (msg) => {
+                const data = JSON.parse(msg.data)
+                if (data.err) {
+                    observer.error(data.err)
+                    return
+                }
+                if (data.requestId !== this.requestId) {
+                    return
+                }
+                const srcQuery = queries[data.requestId]
+                const collection = database[srcQuery.model]
+                if (srcQuery.options.one) {
+                    collection.insert(data.item)
+                    observer.next(data.item)
+                }
+                else {
+                    collection.insertMany(data.items)
+                    observer.next(data.items)
+                }
+                //console.log('database', database)
+
+            }
+            return { unsubscribe() { } }
+        })
+        this.requestId = requestId
+    }
+}
+
+
+function messageHandler(observer: any) {
     socket.onmessage = function (msg) {
-        console.log(msg.data);
-        database = database.concat(msg.data)
-        observer.next(database)
+        const data = JSON.parse(msg.data)
+        console.log('message', data);
+        if (data.err) {
+            observer.error(data.err)
+            return
+        }
+        const srcQuery = queries[data.requestId]
+        const collection = database[srcQuery.model]
+        if (srcQuery.options.one) {
+            collection.insert(data.item)
+            observer.next(data.item)
+        }
+        else {
+            collection.insertMany(data.items)
+            observer.next(data.items)
+        }
+        //console.log('database', database)
+
     }
     return { unsubscribe() { } }
-})
+}
 
 socket.onopen = function () {
     console.log('socket connected');
     while (requestStack.length) {
-        fetch(requestStack.pop() || [])
+        fetchQuery(requestStack.pop())
     }
 }
 
@@ -27,12 +103,28 @@ socket.onclose = function () {
     console.log('socket disconnected');
 }
 
-export function fetch(keys: string[], filters?: any): Observable<any> {
-    if (socket.readyState === 1) {
-        socket.send(JSON.stringify({ keys, filters }));
-        console.log('request sent');
-    } else {
-        requestStack.push(keys);
+export function fetchQuery(query: IQuery): Observable<any> {
+    if (!database[query.model]) {
+        database[query.model] = new Collection(query.model)
     }
-    return dataObs;
+    let requestId = queries.indexOf(query)
+    if (requestId === -1) {
+        requestId = queries.length;
+        queries.push(query)
+        queriesObs.push(new QueryObs(requestId))
+    }
+    if (socket.readyState === 1 && !sentQueries.has(query)) {
+        sentQueries.add(query)
+        socket.send(JSON.stringify({ requestId, ...query }))
+        console.log('request sent ', query)
+    } else {
+        requestStack.push(query)
+    }
+    return queriesObs[requestId];
+}
+
+export function fetch(model: string, keys: string[] = [], filters: any = {}, options: any = {}): Observable<any> {
+    const query = { model, keys, filters, options } as IQuery
+    return fetchQuery(query)
+
 }

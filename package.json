@@ -32,6 +32,7 @@
     "gulp": "^4.0.0",
     "less": "^3.9.0",
     "less-loader": "^4.1.0",
+    "node-loader": "^0.6.0",
     "nodemon": "^1.18.10",
     "raw-loader": "^2.0.0",
     "style-loader": "^0.23.1",
@@ -42,18 +43,24 @@
     "webpack-cli": "^3.3.0"
   },
   "dependencies": {
+    "@types/jsdom": "^12.2.3",
     "@types/mongoose": "^5.3.24",
+    "@types/oniguruma": "^7.0.1",
+    "jsdom": "^14.0.0",
+    "jsdom-global": "^3.0.2",
     "mongoose": "^5.4.20",
+    "oniguruma": "^7.0.2",
     "rxjs": "^6.4.0",
-    "socket.io": "^2.2.0",
+    "vscode-textmate": "^4.1.0",
     "ws": "^6.2.1"
   },
   "nodemonConfig": {
     "ext": "js ts lkf",
     "ignore": [
       "dev/public/*",
-      "dist/*"
+      "dist/*",
+      "test/tokens.json"
     ],
-    "exec": "start cmd.exe /c \"webpack && exit\" && node ./dev"
+    "exec": "tsc && node ./dist && start cmd.exe /c \"webpack\" && node ./dev "
   }
 }
