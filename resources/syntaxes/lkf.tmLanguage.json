@@ -6,7 +6,10 @@
 			"include": "#javascript"
 		},
 		{
-			"include": "#keyword"
+			"include": "#condition"
+		},
+		{
+			"include": "#loop"
 		},
 		{
 			"include": "#string"
@@ -30,7 +33,7 @@
 		"string": {
 			"patterns": [
 				{
-					"name": "string.quoted.double.lkf",
+					"name": "string.quoted.lkf string.quoted.double.lkf",
 					"begin": "\"",
 					"end": "\"",
 					"patterns": [
@@ -40,7 +43,7 @@
 					]
 				},
 				{
-					"name": "string.quoted.single.lkf",
+					"name": "string.quoted.lkf string.quoted.single.lkf",
 					"begin": "'",
 					"end": "'",
 					"patterns": [
@@ -71,6 +74,44 @@
 			"contentName": "meta.embedded.inline.js",
 			"patterns": []
 		},
+		"condition": {
+			"name": "meta.condition.lkf",
+			"begin": "^\\s*(if|else if|else)\\s*",
+			"end": "(.*)\\s*$",
+			"beginCaptures": {
+				"1": {
+					"name": "entity.keyword.lkf keyword.control.lkf"
+				}
+			},
+			"endCaptures": {
+				"1": {
+					"name": "entity.content.lkf meta.embedded.inline.js"
+				}
+			},
+			"patterns": []
+		},
+		"loop": {
+			"name": "meta.loop.lkf",
+			"begin": "^\\s*(for)\\s*(\\w*)\\s*(of)\\s*",
+			"end": "(.*)\\s*$",
+			"beginCaptures": {
+				"1": {
+					"name": "entity.keyword.lkf keyword.control.lkf"
+				},
+				"2": {
+					"name": "entity.content.lkf variable.parameter.lkf"
+				},
+				"3": {
+					"name": "entity.keyword.lkf keyword.control.lkf"
+				}
+			},
+			"endCaptures": {
+				"1": {
+					"name": "entity.content.lkf meta.embedded.inline.js"
+				}
+			},
+			"patterns": []
+		},
 		"container": {
 			"patterns": [
 				{
@@ -79,27 +120,45 @@
 					"end": "\\s*$",
 					"beginCaptures": {
 						"1": {
-							"name": "storage.type.container.lkf"
+							"name": "entity.name.lkf storage.type.container.lkf"
 						}
 					},
 					"patterns": [
 						{
 							"name": "variable.parameter.lkf",
-							"match": "\\b(left|center|right|top|middle|bottom|small|vertical)\\b"
+							"match": "\\.([\\w-]+)\\b",
+							"captures": {
+								"1": {
+									"name": "entity.container.class.lkf"
+								}
+							}
+						},
+						{
+							"name": "variable.parameter.lkf",
+							"match": "\\b(left|center|right|top|middle|bottom|small|vertical|full|nowrap)\\b",
+							"captures": {
+								"1": {
+									"name": "entity.parameter.lkf"
+								}
+							}
 						},
 						{
 							"name": "meta.container.parameter.lkf",
 							"begin": "\\b(margin)\\b",
-							"end": "\\s(?!(\\s*\\d))",
+							"end": "\\s(?!(\\s*-?\\d))",
 							"beginCaptures": {
 								"1": {
-									"name": "variable.parameter.lkf"
+									"name": "entity.parameter.lkf variable.parameter.lkf"
 								}
 							},
 							"patterns": [
 								{
-									"name": "constant.numeric.lkf",
-									"match": "\\b\\d+\\b"
+									"match": "\\s(-?\\d+)\\b",
+									"captures": {
+										"1": {
+											"name": "entity.number.lkf constant.numeric.lkf"
+										}
+									}
 								}
 							]
 						}
@@ -113,6 +172,7 @@
 			"end": "\\s*$",
 			"beginCaptures": {
 				"1": {
+					"name": "entity.name.lkf",
 					"patterns": [
 						{
 							"include": "#tag-name"
@@ -136,10 +196,19 @@
 				},
 				{
 					"name": "variable.parameter.lkf",
+					"match": "##([\\w-]+)\\b",
+					"captures": {
+						"1": {
+							"name": "entity.id.global.lkf"
+						}
+					}
+				},
+				{
+					"name": "variable.parameter.lkf",
 					"match": "#([\\w-]+)\\b",
 					"captures": {
 						"1": {
-							"name": "meta.tag.id.lkf"
+							"name": "entity.id.local.lkf"
 						}
 					}
 				},
@@ -148,7 +217,15 @@
 					"match": "\\.([\\w-]+)\\b",
 					"captures": {
 						"1": {
-							"name": "meta.tag.class.lkf"
+							"name": "entity.class.lkf"
+						}
+					}
+				},
+				{
+					"match": "\\s([^}]*)(?!(.*\\}))",
+					"captures": {
+						"1": {
+							"name": "entity.content.lkf"
 						}
 					}
 				}
@@ -157,11 +234,11 @@
 		"tag-name": {
 			"patterns": [
 				{
-					"name": "storage.type.tag.lkf meta.tag.name.lkf",
+					"name": "storage.type.tag.lkf",
 					"match": "\\b(a|abbr|address|area|article|aside|audio|b|bdi|bdo|blockquote|body|br|button|canvas|caption|cite|code|col|colgroup|command|datalist|dd|del|details|dfn|div|dl|dt|em|embed|fieldset|figcaption|figure|footer|form|h1|h2|h3|h4|h5|h6|header|hr|html|i|iframe|img|input|ins|kbd|keygen|label|legend|li|main|map|mark|menu|meter|nav|object|ol|optgroup|option|output|p|param|pre|progress|q|rp|rt|ruby|s|samp|section|select|small|source|span|strong|sub|summary|sup|table|tbody|td|textarea|tfoot|th|thead|time|tr|track|u|ul|var|video|wbr)\\b"
 				},
 				{
-					"name": "support.type.tag.lkf meta.tag.name.lkf",
+					"name": "support.type.tag.lkf",
 					"match": "\\b([\\w-]+)\\b"
 				}
 			]
@@ -172,17 +249,20 @@
 			"end": "(?=\\s*(\\w|\\)))",
 			"beginCaptures": {
 				"1": {
-					"name": "variable.parameter.lkf meta.tag.attribute.name.lkf"
+					"name": "entity.attribute.name.lkf variable.parameter.lkf"
 				}
 			},
 			"patterns": [
 				{
 					"begin": "\\s*=\\s*",
 					"end": "(?=\\s|\\))",
-					"contentName": "meta.tag.attribute.value.lkf",
+					"contentName": "entity.attribute.value.lkf",
 					"patterns": [
 						{
 							"include": "#inline-js"
+						},
+						{
+							"include": "#string"
 						}
 					]
 				}

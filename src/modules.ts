@@ -1,4 +1,4 @@
-import { Component } from "./component";
+import { Component, head } from "./component";
 import { LNode } from "./nodeUtil";
 
-export { Component, LNode }
+export { Component, LNode, head }

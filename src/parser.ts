@@ -4,23 +4,30 @@ import fs from 'fs'
 import path from 'path'
 import { Tree, LNode, NodeType } from './nodeUtil';
 
-
+let fileid = 0
 export async function parse(input: string, options?: any) {
     const tokens = await tokenize(input)
     // for debug
-    fs.writeFileSync(path.join(__dirname, '../test/tokens.json'), JSON.stringify(tokens))
-    var parser = new Parser(tokens, options || {});
+    fs.writeFileSync(path.join(__dirname, `../test/tokens${fileid++}.json`), JSON.stringify(tokens))
+    var parser = new Parser(tokens, options);
     var ast = parser.parse();
     return JSON.parse(JSON.stringify(ast));
 };
 
 class Parser {
 
-    private tokens: TokenStream;
+    private tokens: TokenStream
+    private idGenerator = 0
+    private filename: string
 
     constructor(tokens: TokenList, options: any) {
-        options = options || {};
-        this.tokens = new TokenStream(tokens);
+        options = options || {}
+        this.filename = options.filename
+        this.tokens = new TokenStream(tokens)
+    }
+
+    nextId() {
+        return (this.filename || '*') + '-' + this.idGenerator++
     }
 
     error(code: string, message: string, token: Token) {
@@ -59,8 +66,15 @@ class Parser {
 
         let line
         while (line = this.nextLine()) {
-            const expr = this.parseLine(line.type);
-            if (expr) tree.append(expr, line.indent);
+            const node = this.parseLine(line.type);
+            if (node) {
+                try {
+                    tree.append(node, line.indent)
+                }
+                catch (err) {
+                    this.error('INVALID_COND', `${err} at line ${line.line}`, this.peek())
+                }
+            }
         }
 
         console.log(tree.root);
@@ -77,6 +91,10 @@ class Parser {
                 return this.parseTag()
             case TokenType.JAVASCRIPT:
                 return this.parseJavascript()
+            case TokenType.CONDITION:
+                return this.parseCondition()
+            case TokenType.LOOP:
+                return this.parseLoop()
             default:
                 this.error('INVALID_TOKEN', 'unexpected token', this.peek());
 
@@ -84,13 +102,19 @@ class Parser {
     }
 
     parseContainer() {
-        this.expect('storage.type.container.lkf');
-        const opts: any = {}
+        this.expect(TokenType.NAME);
+        const opts: any = { align: {} }
         let tok
         while (tok = this.accept(TokenType.PARAMETER)) {
             switch (tok.value) {
                 case 'margin':
                     opts.margin = this.parseMargin();
+                    break
+                case 'left': case 'center': case 'right':
+                    opts.align.horizontal = tok.value
+                    break
+                case 'top': case 'middle': case 'bottom':
+                    opts.align.vertical = tok.value
                 default:
                     opts[tok.value] = true
             }
@@ -99,11 +123,14 @@ class Parser {
     }
 
     parseMargin() {
-        let p, margin = [this.expect(TokenType.NUMBER).value];
+        let p
+        let margin: string[] = [this.expect(TokenType.NUMBER).value];
         while ((p = this.accept(TokenType.NUMBER)) && margin.length < 4) {
             margin.push(p.value)
         }
         const l = margin.length;
+        console.log(margin);
+
         return {
             top: margin[0],
             right: margin[1 % l],
@@ -113,22 +140,38 @@ class Parser {
     }
 
     parseTag() {
-        const tag = this.expect('meta.tag.name.lkf');
+        const tag = this.expect(TokenType.NAME);
         const nodeType = tag.scopes.includes('storage.type.tag.lkf') ? NodeType.HTML : NodeType.COMPONENT;
-        const opts: any = { classList: [], attributes: {} };
+        const opts: any = { tag: tag.value, id: this.nextId(), classList: [], attributes: {} };
         let tok;
-        while ((tok = this.accept('meta.tag.class.lkf')) || (tok = this.accept('meta.tag.attribute.name.lkf'))) {
+        while ((tok = this.accept(TokenType.CLASS)) || (tok = this.accept('entity.attribute.name.lkf')) || (tok = this.accept('entity.id.global.lkf')) || (tok = this.accept('entity.id.local.lkf'))) {
             switch (tok.type) {
-                case 'meta.tag.class.lkf':
+                case 'entity.id.global.lkf':
+                    opts.globalId = tok.value
+                    break
+                case 'entity.id.local.lkf':
+                    opts.localId = tok.value
+                    break
+                case TokenType.CLASS:
                     opts.classList.push(tok.value)
                     break
-                case 'meta.tag.attribute.name.lkf':
-                    const val = this.accept('meta.embedded.inline.js');
-                    opts.attributes[tok.value] = val ? val.value : true
+                case 'entity.attribute.name.lkf':
+                    const val = this.accept('entity.attribute.value.lkf')
+                    if (val) {
+                        opts.attributes[tok.value] = val.scopes.includes('string.quoted.lkf') ? `'${val.value}'` : val.value
+
+                    } else {
+                        opts.attributes[tok.value] = true
+                    }
                     break
             }
         }
-        opts.content = this.accept('meta.embedded.inline.js')
+        if (tok = this.accept(TokenType.CONTENT)) {
+            opts.content = `'${tok.value}'`
+        }
+        else if (tok = this.accept('meta.embedded.inline.js')) {
+            opts.content = tok.value
+        }
         return new LNode(nodeType, opts)
     }
 
@@ -137,6 +180,27 @@ class Parser {
         return new LNode(NodeType.SCRIPT, { script: tok.value })
     }
 
+    parseLoop() {
+        this.expect(TokenType.KEYWORD)
+        const variable = this.expect(TokenType.CONTENT).value
+        this.expect(TokenType.KEYWORD)
+        const expression = this.expect(TokenType.CONTENT).value
+        return new LNode(NodeType.LOOP, { variable, expression })
+    }
+
+    parseCondition() {
+        const keyword = this.expect(TokenType.KEYWORD).value
+        if (keyword === 'if') {
+            const expression = this.expect(TokenType.CONTENT).value
+            return new LNode(NodeType.IF, { expression })
+        }
+        else if (keyword === 'else if') {
+            const expression = this.expect(TokenType.CONTENT).value
+            return new LNode(NodeType.ELIF, { expression })
+        }
+        return new LNode(NodeType.ELSE)
+
+    }
     // parseHAlign(h: string) {
     //     const tok = this.accept(TokenType.KEYWORD)
     //     const v = tok ? tok.value : 'top';

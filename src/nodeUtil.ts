@@ -1,10 +1,17 @@
+import { last } from './helpers'
+
 export enum NodeType {
     BLOCK = 'block',
     CONTAINER = 'container',
     HTML = 'html',
     COMPONENT = 'component',
     DATA = 'data',
-    SCRIPT = 'script'
+    SCRIPT = 'script',
+    LOOP = 'loop',
+    CONDITION = 'condition',
+    IF = 'if',
+    ELIF = 'else if',
+    ELSE = 'else'
 }
 
 export class LNode {
@@ -28,8 +35,21 @@ export class Tree {
             if (!parentNode.nodes.length) {
                 parentNode.nodes.push(new LNode(NodeType.BLOCK));
             }
-            parentNode = parentNode.nodes[parentNode.nodes.length - 1];
+            parentNode = last(parentNode.nodes);
         }
-        parentNode.nodes.push(node);
+        if (parentNode.type === NodeType.CONDITION) {
+            parentNode = last(parentNode.nodes)
+        }
+        if (node.type === NodeType.IF) {
+            parentNode.nodes.push(new LNode(NodeType.CONDITION, {}, [node]))
+        } else if (node.type === NodeType.ELIF || node.type === NodeType.ELSE) {
+            const condNode = last(parentNode.nodes)
+            if (!condNode || condNode.type !== NodeType.CONDITION) {
+                throw new Error('error in condition structure');
+            }
+            condNode.nodes.push(node)
+        } else {
+            parentNode.nodes.push(node);
+        }
     }
 }

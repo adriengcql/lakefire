@@ -14,11 +14,19 @@ module.exports = {
             {
                 test: /\.lkf$/i,
                 use: 'raw-loader',
-            }
+            },
+            {
+                test: /global\.css$/,
+                loader: ['style-loader', 'css-loader']
+            },
+            {
+                test: /[^(global)]\.css$/,
+                use: ['style-loader', { loader: 'css-loader', options: { modules: true, localIdentName: '[name]__[local]___[hash:base64:5]' } }],
+            },
         ]
     },
     resolve: {
-        extensions: ['.tsx', '.ts', '.js']
+        extensions: ['.tsx', '.ts', '.js', '.css', '.json']
     },
     output: {
         filename: 'bundle.js',

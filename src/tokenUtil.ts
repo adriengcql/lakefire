@@ -3,19 +3,15 @@ import { listenerCount } from "cluster";
 export enum TokenType {
     CONTAINER = 'meta.container.lkf',
     TAG = 'meta.tag.lkf',
+    CONDITION = 'meta.condition.lkf',
+    LOOP = 'meta.loop.lkf',
     JAVASCRIPT = 'meta.embedded.block.js',
-    PARAMETER = 'variable.parameter.lkf',
-    COMMENT = 'comment',
-    NUMBER = 'constant.numeric.lkf',
-    STRING = 'string',
-    KEYWORD = 'keyword',
-    IDENTIFIER = 'identifier',
-    ASSIGN = 'assign',
-    OPERATOR = 'operator',
-    LAYOUT = 'layout',
-    INDENT = 'indent',
-    OBJECT = 'object',
-    HTML = 'html',
+    PARAMETER = 'entity.parameter.lkf',
+    NUMBER = 'entity.number.lkf',
+    NAME = 'entity.name.lkf',
+    CONTENT = 'entity.content.lkf',
+    CLASS = 'entity.class.lkf',
+    KEYWORD = 'entity.keyword.lkf',
 }
 
 

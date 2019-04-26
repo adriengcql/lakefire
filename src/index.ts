@@ -16,14 +16,17 @@ async function build(filePath: string) {
     else if (path.extname(filePath) === '.lkf') {
 
         const input = fs.readFileSync(filePath, 'utf8')
+        const output = await parse(input)
+        components[path.basename(filePath).replace(/\.lkf$/, '')] = output
+        console.log(filePath, output);
 
-        components[path.basename(filePath).replace(/\.lkf$/, '')] = await parse(input)
+        fs.writeFileSync(filePath.replace(/\.lkf$/, '.json'), JSON.stringify(output))
     }
 }
 
 async function buildApp() {
     await build(_path)
-    fs.writeFileSync(path.resolve(_path, 'app.json'), JSON.stringify(components))
+    fs.writeFileSync(path.resolve(_path, 'global.json'), JSON.stringify(components))
 }
 
 buildApp().then(() => {

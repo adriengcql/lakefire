@@ -46,6 +46,7 @@
     "@types/jsdom": "^12.2.3",
     "@types/mongoose": "^5.3.24",
     "@types/oniguruma": "^7.0.1",
+    "caller-source-location": "^1.0.0",
     "jsdom": "^14.0.0",
     "jsdom-global": "^3.0.2",
     "mongoose": "^5.4.20",
@@ -55,7 +56,7 @@
     "ws": "^6.2.1"
   },
   "nodemonConfig": {
-    "ext": "js ts lkf",
+    "ext": "js ts lkf css",
     "ignore": [
       "dev/public/*",
       "dist/*",
