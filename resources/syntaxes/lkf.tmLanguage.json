@@ -92,21 +92,21 @@
 		},
 		"loop": {
 			"name": "meta.loop.lkf",
-			"begin": "^\\s*(for)\\s*(\\w*)\\s*(of)\\s*",
-			"end": "(.*)\\s*$",
+			"begin": "^\\s*(for)",
+			"end": "\\s*(\\w*)\\s*(of)\\s*(.*)\\s*$",
 			"beginCaptures": {
 				"1": {
-					"name": "entity.keyword.lkf keyword.control.lkf"
-				},
-				"2": {
-					"name": "entity.content.lkf variable.parameter.lkf"
-				},
-				"3": {
 					"name": "entity.keyword.lkf keyword.control.lkf"
 				}
 			},
 			"endCaptures": {
 				"1": {
+					"name": "entity.content.lkf variable.parameter.lkf"
+				},
+				"2": {
+					"name": "entity.keyword.lkf keyword.control.lkf"
+				},
+				"3": {
 					"name": "entity.content.lkf meta.embedded.inline.js"
 				}
 			},

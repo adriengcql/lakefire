@@ -2,6 +2,7 @@ import { parse } from './parser'
 import fs from 'fs'
 import path from 'path'
 import { LNode } from './nodeUtil';
+import { debug } from './helpers';
 require('jsdom-global')()
 
 const _path = path.resolve(process.cwd(), 'test/app')
@@ -30,6 +31,6 @@ async function buildApp() {
 }
 
 buildApp().then(() => {
-    console.log('Build Done');
+    debug('Build Done');
     process.exit()
 })

@@ -1,5 +1,6 @@
 
 import { Observable } from 'rxjs';
+import { debug } from './helpers';
 
 const socket = new WebSocket('ws://localhost:9000');
 
@@ -93,14 +94,14 @@ function messageHandler(observer: any) {
 }
 
 socket.onopen = function () {
-    console.log('socket connected');
+    debug('socket connected');
     while (requestStack.length) {
         fetchQuery(requestStack.pop())
     }
 }
 
 socket.onclose = function () {
-    console.log('socket disconnected');
+    debug('socket disconnected');
 }
 
 export function fetchQuery(query: IQuery): Observable<any> {
@@ -116,7 +117,7 @@ export function fetchQuery(query: IQuery): Observable<any> {
     if (socket.readyState === 1 && !sentQueries.has(query)) {
         sentQueries.add(query)
         socket.send(JSON.stringify({ requestId, ...query }))
-        console.log('request sent ', query)
+        debug('request sent ' + query)
     } else {
         requestStack.push(query)
     }

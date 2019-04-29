@@ -2,6 +2,7 @@ import { parse } from './parser';
 import { fetch } from './services';
 import { LNode } from './modules';
 import { NodeType } from './nodeUtil';
+import { debug } from './helpers';
 
 const colors: string[] = ['aqua', 'blue', 'fuchsia', 'gray', 'green',
     'lime', 'maroon', 'navy', 'olive', 'orange', 'purple', 'red',
@@ -35,7 +36,7 @@ function renderNode(node: LNode): HTMLElement {
                         div.innerText = Object.values(data).join('')
                     }
                 },
-                err => { console.log(err) }
+                err => { debug(err, 'error') }
             )
             break;
         case NodeType.HTML:

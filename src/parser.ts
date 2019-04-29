@@ -27,6 +27,8 @@ class Parser {
     }
 
     nextId() {
+        console.log('id', this.idGenerator);
+
         return (this.filename || '*') + '-' + this.idGenerator++
     }
 
@@ -142,7 +144,8 @@ class Parser {
     parseTag() {
         const tag = this.expect(TokenType.NAME);
         const nodeType = tag.scopes.includes('storage.type.tag.lkf') ? NodeType.HTML : NodeType.COMPONENT;
-        const opts: any = { tag: tag.value, id: this.nextId(), classList: [], attributes: {} };
+        const opts: any = { tag: tag.value, id: this.nextId(), classList: [], attributes: {}, props: '{}' };
+
         let tok;
         while ((tok = this.accept(TokenType.CLASS)) || (tok = this.accept('entity.attribute.name.lkf')) || (tok = this.accept('entity.id.global.lkf')) || (tok = this.accept('entity.id.local.lkf'))) {
             switch (tok.type) {
@@ -156,9 +159,14 @@ class Parser {
                     opts.classList.push(tok.value)
                     break
                 case 'entity.attribute.name.lkf':
-                    const val = this.accept('entity.attribute.value.lkf')
-                    if (val) {
-                        opts.attributes[tok.value] = val.scopes.includes('string.quoted.lkf') ? `'${val.value}'` : val.value
+                    const nextTok = this.accept('entity.attribute.value.lkf')
+                    if (nextTok) {
+                        if (tok.value === 'props') {
+                            opts.props = `{${nextTok.value}}`
+                        }
+                        else {
+                            opts.attributes[tok.value] = nextTok.scopes.includes('string.quoted.lkf') ? `'${nextTok.value}'` : nextTok.value
+                        }
 
                     } else {
                         opts.attributes[tok.value] = true

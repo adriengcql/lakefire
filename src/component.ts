@@ -1,5 +1,5 @@
 import { LNode, NodeType } from "./nodeUtil"
-import { last } from "./helpers"
+import { last, debug } from "./helpers"
 import * as path from 'path'
 
 const _components = require('../test/app/global.json')
@@ -21,7 +21,7 @@ export function head(h: any) {
     }
 }
 
-function evalExp(exp: string, ctx: any) {
+function evalExp(exp: string, ctx?: any) {
     if (!exp) {
         return ''
     }
@@ -29,7 +29,9 @@ function evalExp(exp: string, ctx: any) {
         return (Function('return ' + exp)).call(ctx)
     }
     catch (err) {
-        console.error(err)
+        console.error(err);
+
+        debug(err, 'error')
         return ''
     }
 }
@@ -39,46 +41,102 @@ export class Component {
 
     componentWillMount(): void { }
     componentDidMount(): void { }
+    componentWillUpdate(): void { }
+    componentDidUpdate(): void { }
     private type: string;
     private root: LNode
     private imports: any
-    private children: { [id: string]: { anchor: HTMLElement, component: Component, options: any } } = {}
+    private children: { [id: string]: { anchor: HTMLElement, component: Component, options: any, props: any } } = {}
     private scopes: any[] = []
     private styles: any
-    public elements: { [id: string]: HTMLElement } = {}
+    private state: Set<string> = new Set<string>()
+    private mounted = false
+    private updating = false
+    public elements: { [id: string]: HTMLElement | undefined } = {}
     public components: { [id: string]: Component } = {}
     public html: HTMLElement | undefined
+    public props: any
 
-    constructor() {
+    constructor(props?: any) {
         this.type = this.constructor.name;
-        this.root = (this as any)['template'] as LNode || new LNode(NodeType.BLOCK);
-        this.imports = (this as any)['importedComponents'] as { [name: string]: Component } || {}
-        this.styles = (this as any)['stylesheet'] as any || {}
+        const self = this as any
+        this.root = { ...self['template'] as LNode } || new LNode(NodeType.BLOCK);
+        this.imports = self['importedComponents'] as { [name: string]: Component } || {}
+        this.styles = self['stylesheet'] as any || {}
+        this.props = props || {}
     }
 
     public mount(anchor: HTMLElement, options: any = {}) {
         this.root.options = options
+
         this.componentWillMount()
-        this.html = this.render()
+        this.html = this.render() as HTMLElement
 
         if (this.html) {
             (this.html as any).component = this
             anchor.replaceWith(this.html)
         }
         for (const child of Object.values(this.children)) {
-            const localId = child.options.localId
-            const r = child.component.mount(child.anchor, child.options)
-
+            const { localId, tag } = child.options
+            delete child.options.localId
+            child.component.mount(child.anchor, child.options)
             if (localId) {
                 this.components[localId] = child.component
-                if (r) {
-                    this.elements[localId] = r
-                }
+                this.elements[localId] = child.component.html
             }
-            delete child.options.localId
+            if (child.component.html && tag) {
+                child.component.html.classList.add(tag)
+            }
         }
+
+        this.state.forEach(v => {
+            Object.defineProperty(this, v, {
+                get: function () {
+                    return this['i' + v];
+                },
+                set: function (value) {
+
+                    this['i' + v] = value
+                    if (!this.updating) {
+                        this.refresh()
+                    }
+                }
+            });
+        })
         this.componentDidMount()
-        return this.html
+        this.mounted = true
+    }
+
+    public refresh(props?: any) {
+        this.props = props || this.props
+        this.updating = true
+        this.componentWillUpdate()
+        const newHtml = this.render() as HTMLElement
+
+        if (this.html) {
+            (newHtml as any).component = this
+            this.html.replaceWith(newHtml)
+            this.html = newHtml
+        }
+
+        for (const child of Object.values(this.children)) {
+            const { localId, tag } = child.options
+            delete child.options.localId
+
+            child.component.refresh(child.props)
+
+            if (child.component.html) {
+                if (tag) {
+                    child.component.html.classList.add(tag)
+                }
+                child.anchor.replaceWith(child.component.html)
+            }
+            if (localId) {
+                this.elements[localId] = child.component.html
+            }
+        }
+        this.componentDidUpdate()
+        this.updating = false
     }
 
     private render() {
@@ -97,8 +155,10 @@ export class Component {
                 return this.renderComponent(node)
             case NodeType.CONDITION:
                 return this.renderCondition(node)
+            case NodeType.LOOP:
+                return this.renderLoop(node)
             case NodeType.SCRIPT:
-                this.execJavascript(node)
+                this.execJavascript(node.options.script)
                 return null
             default:
                 return document.createElement('div')
@@ -118,9 +178,14 @@ export class Component {
         }
         this.scopes.push(proxy)
         for (const n of nodes) {
-            const child = this.renderNode(n)
-            if (child) {
-                div.appendChild(child)
+            const children = this.renderNode(n)
+            if (children) {
+                if (Array.isArray(children)) {
+                    div.append(...children)
+                }
+                else {
+                    div.appendChild(children)
+                }
             }
         }
         this.scopes.pop()
@@ -128,6 +193,9 @@ export class Component {
 
     private createElement(tag: string, opts: any) {
         const div = document.createElement(tag)
+        if (tag !== 'div') {
+            div.classList.add(tag)
+        }
         if (opts.classList && opts.classList.length) {
             div.classList.add(opts.classList.map((c: string) => this.styles[c] || c))
         }
@@ -146,8 +214,6 @@ export class Component {
 
     private renderBlock(node: LNode) {
         const div = this.createElement('div', node.options)
-        console.log(node.options);
-
         this.renderChildren(div, node.nodes)
         return div
     }
@@ -155,7 +221,8 @@ export class Component {
     private renderContainer(node: LNode) {
         const opts = node.options
         const div = this.createElement('div', opts)
-        //div.innerText = 'Container'
+        //div.innerText = 'Container'+-+-
+        div.classList.add('container')
 
         div.style.display = 'flex';
         div.style.flexDirection = opts.vertical ? 'column' : 'row';
@@ -202,8 +269,9 @@ export class Component {
     private renderHTML(node: LNode) {
         const opts = node.options
         const div = this.createElement(opts.tag, opts)
-
-        div.innerText = evalExp(opts.content, this)
+        if (opts.content) {
+            div.innerText = this.evalExp(opts.content)
+        }
         this.renderChildren(div, node.nodes)
         return div
     }
@@ -211,8 +279,14 @@ export class Component {
     private renderComponent(node: LNode) {
         const opts = node.options
         const div = document.createElement('div')
+        const props = this.evalExp(opts.props)
+
         if (!(opts.id in this.children)) {
-            this.children[opts.id] = { anchor: div, component: new this.imports[opts.tag](), options: opts }
+            this.children[opts.id] = { anchor: div, component: new this.imports[opts.tag](props), options: opts, props }
+        }
+        else {
+            this.children[opts.id].anchor = div
+            this.children[opts.id].props = props
         }
         return div
     }
@@ -220,26 +294,49 @@ export class Component {
     private renderCondition(node: LNode) {
         const div = document.createElement('div')
         for (const n of node.nodes) {
-            if (((n.type === NodeType.IF || n.type === NodeType.ELIF) && evalExp(n.options.expression, this)) || n.type === NodeType.ELSE) {
+            if (((n.type === NodeType.IF || n.type === NodeType.ELIF) && this.evalExp(n.options.expression)) || n.type === NodeType.ELSE) {
                 this.renderChildren(div, n.nodes)
-                return div
+                return Array.from(div.children)
             }
         }
         return null
     }
 
     private renderLoop(node: LNode) {
-
+        const opts = node.options
+        const div = document.createElement('div')
+        const proxy = last(this.scopes)
+        for (const item of this.evalExp(opts.expression)) {
+            proxy[opts.variable.trim()] = item
+            this.renderChildren(div, node.nodes)
+        }
+        return Array.from(div.children)
     }
 
-    private execJavascript(node: LNode) {
-        const exp = node.options.script.replace(/\b(let|const)\s/g, 'var ')
-        const proxy = last(this.scopes)
+    private execJavascript(script: string) {
+        if (!script) {
+            return null
+        }
+
         try {
-            (Function('return (function(proxy) { with(proxy) {' + exp + '} })'))().call(this, proxy)
+            if (!this.mounted) {
+                let vars = script.match(/(this\.\w+\b)(?!\()/g) || []
+                const funcs = script.match(/(this\.\w+\b)(?=\()/g) || []
+                funcs.map(f => vars = vars.concat((this as any)[f.substr(5)].toString().match(/(this\.\w+\b)(?!\()/g)))
+                vars.filter(v => v && v !== 'this.props').map(v => this.state.add(v.substr(5)))
+            }
+
+            const exp = script.replace(/\b(let|const)\s/g, 'var ')
+            const proxy = last(this.scopes)
+            return (Function('return (function(proxy) { with(proxy) { ' + exp + '} })'))().call(this, proxy)
         }
         catch (err) {
-            console.error(err)
+            debug(script, 'error')
+            return null
         }
+    }
+
+    private evalExp(exp: string) {
+        return this.execJavascript('return ' + exp)
     }
 }
