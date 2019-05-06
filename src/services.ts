@@ -1,16 +1,7 @@
 
 import { Observable } from 'rxjs';
-import { debug } from './helpers';
-
-const socket = new WebSocket('ws://localhost:9000');
-
-const requestStack: any[] = [];
-
-const queries: any[] = []
-const sentQueries = new Set()
-const queriesObs: QueryObs[] = []
-
-const database: { [model: string]: Collection } = {};
+import { debug, last } from './helpers';
+import { EventEmitter } from 'events';
 
 interface IQuery {
     model: string
@@ -37,95 +28,129 @@ class Collection {
 }
 
 class QueryObs extends Observable<any> {
-    requestId: number
-    constructor(requestId: number) {
+
+    emitter: EventEmitter = new EventEmitter()
+    public type: 'array' | 'value'
+    public data: any[] | any
+
+    constructor(type: 'array' | 'value') {
+
         super((observer) => {
-            socket.onmessage = (msg) => {
-                const data = JSON.parse(msg.data)
-                if (data.err) {
-                    observer.error(data.err)
-                    return
-                }
-                if (data.requestId !== this.requestId) {
-                    return
-                }
-                const srcQuery = queries[data.requestId]
-                const collection = database[srcQuery.model]
-                if (srcQuery.options.one) {
-                    collection.insert(data.item)
-                    observer.next(data.item)
-                }
-                else {
-                    collection.insertMany(data.items)
-                    observer.next(data.items)
-                }
-                //console.log('database', database)
-
+            //observer.next(this.data)
+            this.emitter.on('data', (data: any) => {
+                console.log('test2', data);
+                observer.next(data)
+            })
+            this.emitter.on('error', (err) => {
+                observer.error(last(err))
+            })
+            return {
+                unsubscribe() { }
             }
-            return { unsubscribe() { } }
         })
-        this.requestId = requestId
+
+        this.type = type
+        return this.data
     }
-}
 
-
-function messageHandler(observer: any) {
-    socket.onmessage = function (msg) {
-        const data = JSON.parse(msg.data)
-        console.log('message', data);
-        if (data.err) {
-            observer.error(data.err)
-            return
-        }
-        const srcQuery = queries[data.requestId]
-        const collection = database[srcQuery.model]
-        if (srcQuery.options.one) {
-            collection.insert(data.item)
-            observer.next(data.item)
+    send(data: any) {
+        console.log('test', data);
+        if (Array.isArray(data)) {
+            if (!this.data) {
+                this.data = []
+            }
+            this.data = this.data.concat(data)
         }
         else {
-            collection.insertMany(data.items)
-            observer.next(data.items)
+            this.data = data
         }
-        //console.log('database', database)
-
+        this.emitter.emit('data', data)
     }
-    return { unsubscribe() { } }
-}
 
-socket.onopen = function () {
-    debug('socket connected');
-    while (requestStack.length) {
-        fetchQuery(requestStack.pop())
+    error(err: any) {
+        this.emitter.emit('error', [err])
     }
 }
 
-socket.onclose = function () {
-    debug('socket disconnected');
-}
 
-export function fetchQuery(query: IQuery): Observable<any> {
-    if (!database[query.model]) {
-        database[query.model] = new Collection(query.model)
-    }
-    let requestId = queries.indexOf(query)
-    if (requestId === -1) {
-        requestId = queries.length;
-        queries.push(query)
-        queriesObs.push(new QueryObs(requestId))
-    }
-    if (socket.readyState === 1 && !sentQueries.has(query)) {
-        sentQueries.add(query)
-        socket.send(JSON.stringify({ requestId, ...query }))
-        debug('request sent ' + query)
-    } else {
-        requestStack.push(query)
-    }
-    return queriesObs[requestId];
-}
+export class Database {
 
-export function fetch(model: string, keys: string[] = [], filters: any = {}, options: any = {}): Observable<any> {
-    const query = { model, keys, filters, options } as IQuery
-    return fetchQuery(query)
+    socket: WebSocket
+    requestStack: any[] = []
+    queries: any[] = []
+    sentQueries = new Set()
+    queriesObs: QueryObs[] = []
+    queriesIndex: string[] = []
+    database: { [model: string]: Collection } = {}
 
+    constructor(url: string) {
+        this.socket = new WebSocket('ws://' + url)
+
+        this.socket.onopen = () => {
+            debug('socket connected');
+            while (this.requestStack.length) {
+                this.fetch(this.requestStack.pop())
+            }
+        }
+
+        this.socket.onclose = () => {
+            debug('socket disconnected');
+        }
+
+        this.socket.onmessage = (msg) => {
+            const data = JSON.parse(msg.data)
+
+            const srcQuery = this.queries[data.requestId]
+            const collection = this.database[srcQuery.model]
+            const obs = this.queriesObs[data.requestId]
+            console.log('new data', data.requestId, obs);
+
+
+            if (data.err) {
+                console.error(data.err)
+                obs.error(data.err)
+                return
+            }
+
+            if (srcQuery.options.one) {
+                collection.insert(data.item)
+                obs.send(data.item)
+            }
+            else {
+                collection.insertMany(data.items)
+                obs.send(data.items)
+            }
+            //console.log('database', database)
+
+        }
+    }
+
+    public get(model: string, keys: string[] = [], filters: any = {}, options: any = {}): Observable<any> {
+        const query = { model, keys, filters, options } as IQuery
+        return this.fetch(query)
+
+    }
+
+    private fetch(query: IQuery): Observable<any> {
+        if (!this.database[query.model]) {
+            this.database[query.model] = new Collection(query.model)
+        }
+        let requestId = this.queriesIndex.indexOf(JSON.stringify(query))
+        if (requestId === -1) {
+            requestId = this.queries.length;
+            this.queriesIndex.push(JSON.stringify(query))
+            this.queries.push(query)
+            this.queriesObs.push(new QueryObs(query.options.one ? 'value' : 'array'))
+        }
+        if (this.socket.readyState === 1) {
+            if (!this.sentQueries.has(requestId)) {
+                this.sentQueries.add(requestId)
+                this.socket.send(JSON.stringify({ requestId, ...query }))
+                console.log('request sent ', query)
+            }
+        } else {
+            this.requestStack.push(query)
+        }
+        return this.queriesObs[requestId];
+    }
 }

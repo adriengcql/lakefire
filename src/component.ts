@@ -1,9 +1,5 @@
-import { LNode, NodeType } from "./nodeUtil"
-import { last, debug } from "./helpers"
-import * as path from 'path'
-
-const _components = require('../test/app/global.json')
-
+import { LNode, NodeType } from './nodeUtil'
+import { last, debug } from './helpers'
 
 const colors: string[] = ['aqua', 'blue', 'fuchsia', 'gray', 'green',
     'lime', 'maroon', 'navy', 'olive', 'orange', 'purple', 'red',
@@ -306,10 +302,13 @@ export class Component {
         const opts = node.options
         const div = document.createElement('div')
         const proxy = last(this.scopes)
-        for (const item of this.evalExp(opts.expression)) {
+        const data = this.evalExp(opts.expression) || []
+
+        for (const item of data) {
             proxy[opts.variable.trim()] = item
             this.renderChildren(div, node.nodes)
         }
+
         return Array.from(div.children)
     }
 
@@ -319,24 +318,46 @@ export class Component {
         }
 
         try {
+
+            const exp = script.replace(/\b(let|const)\s/g, 'var ')
+            const proxy = last(this.scopes)
+            for (const v in proxy) {
+                const obs = proxy[v]
+                if (obs && obs.constructor && obs.constructor.name === 'QueryObs') {
+                    proxy[v] = obs.type === 'array' ? (obs.data || []) : (obs.data || {})
+                }
+            }
+            const res = (Function('return (function(proxy) { with(proxy) { with(this.imports) { ' + exp + ' }}  })'))().call(this, proxy)
             if (!this.mounted) {
                 let vars = script.match(/(this\.\w+\b)(?!\()/g) || []
                 const funcs = script.match(/(this\.\w+\b)(?=\()/g) || []
                 funcs.map(f => vars = vars.concat((this as any)[f.substr(5)].toString().match(/(this\.\w+\b)(?!\()/g)))
                 vars.filter(v => v && v !== 'this.props').map(v => this.state.add(v.substr(5)))
+                for (const v in proxy) {
+                    const obs = proxy[v]
+                    if (obs && obs.constructor && obs.constructor.name === 'QueryObs') {
+                        console.log('subscription : ', v);
+                        obs.subscribe(() => {
+                            if (this.mounted) {
+                                this.refresh()
+                            }
+                        })
+                    }
+                }
             }
-
-            const exp = script.replace(/\b(let|const)\s/g, 'var ')
-            const proxy = last(this.scopes)
-            return (Function('return (function(proxy) { with(proxy) { ' + exp + '} })'))().call(this, proxy)
+            return res
         }
         catch (err) {
-            debug(script, 'error')
+            debug(err, 'error')
             return null
         }
     }
 
     private evalExp(exp: string) {
-        return this.execJavascript('return ' + exp)
+        let data = this.execJavascript('return ' + exp)
+        if (data && data.constructor && data.constructor.name === 'QueryObs') {
+            return data.data
+        }
+        return data
     }
 }

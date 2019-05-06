@@ -62,6 +62,6 @@
       "dist/*",
       "test/tokens.json"
     ],
-    "exec": "tsc && node ./dist && start cmd.exe /c \"webpack\" && node ./dev "
+    "exec": "tsc && echo. && echo. && echo. ------ Lakefire ------ && echo. && node ./dist/lakefire && echo. && echo. && echo. ------ Webpack ------ && echo. && webpack && echo. && echo. && echo. ------ Server ------ && echo. && node ./dev || exit 1"
   }
 }

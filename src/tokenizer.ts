@@ -15,6 +15,16 @@ export async function tokenize(input: string, tabWidth: number = 4): Promise<Tok
     let ruleStack = null
     for (const line of input.split('\r\n')) {
         const lineTokens: any = grammar.tokenizeLine(line, ruleStack)
+        lineTokens.tokens = lineTokens.tokens.reduce((acc: any[], tok: any) => {
+            const last = acc.length && acc[acc.length - 1]
+            if (tok.scopes[tok.scopes.length - 1] === 'meta.embedded.inline.js' && last && last.scopes[last.scopes.length - 1] === 'meta.embedded.inline.js') {
+                last.endIndex = tok.endIndex
+            }
+            else {
+                acc.push(tok)
+            }
+            return acc
+        }, [])
         ruleStack = lineTokens.ruleStack
 
         const tok: any = {
@@ -24,7 +34,7 @@ export async function tokenize(input: string, tabWidth: number = 4): Promise<Tok
                 line: i,
                 col: t.startIndex,
                 value: line.substring(t.startIndex, t.endIndex),
-                type: t.scopes.slice().reverse().find((s: string) => s.split('.')[0] === 'entity') || t.scopes.length && t.scopes[t.scopes.length - 1] || '',
+                type: t.scopes.slice().reverse().find((s: string) => s.split('.')[0] === 'entity') || t.scopes[t.scopes.length - 1] || '',
                 scopes: t.scopes
             })).filter((t: any) => t.value.search(/\w/) >= 0)
         }

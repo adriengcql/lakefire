@@ -72,7 +72,20 @@
 			"begin": "\\{",
 			"end": "\\}",
 			"contentName": "meta.embedded.inline.js",
-			"patterns": []
+			"patterns": [
+				{
+					"include": "#js-object"
+				}
+			]
+		},
+		"js-object": {
+			"begin": "\\{",
+			"end": "\\}",
+			"patterns": [
+				{
+					"include": "#js-object"
+				}
+			]
 		},
 		"condition": {
 			"name": "meta.condition.lkf",

@@ -21,6 +21,10 @@ const paris = new City({
   name: 'Paris',
   population: 100
 });
+const ny = new City({
+  name: 'New-York',
+  population: 200
+});
 
 const mock = [
   new City({
@@ -40,6 +44,7 @@ const mock = [
 paris.save(function (err) {
   if (err) return console.error(err);
 });
+ny.save()
 
 setTimeout(() => {
   City.insertMany(mock)

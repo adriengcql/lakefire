@@ -27,8 +27,6 @@ class Parser {
     }
 
     nextId() {
-        console.log('id', this.idGenerator);
-
         return (this.filename || '*') + '-' + this.idGenerator++
     }
 
@@ -78,10 +76,6 @@ class Parser {
                 }
             }
         }
-
-        console.log(tree.root);
-
-
         return tree.root;
     }
 
