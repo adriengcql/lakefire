@@ -1,0 +1,15 @@
+container middle
+    - const b = true
+    - console.log(b)
+    if this.test(true)
+        p Ok
+    else if this.test(false)
+        - const c = 2
+        p else if
+        a un deuxime paragraphe
+    else
+        p else
+    for val of [1,5,76,23]
+        p Loop
+        p {val}
+container right

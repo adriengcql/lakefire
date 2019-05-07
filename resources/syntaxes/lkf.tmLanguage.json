@@ -1,0 +1,286 @@
+{
+	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
+	"name": "Lakefire",
+	"patterns": [
+		{
+			"include": "#javascript"
+		},
+		{
+			"include": "#condition"
+		},
+		{
+			"include": "#loop"
+		},
+		{
+			"include": "#string"
+		},
+		{
+			"include": "#container"
+		},
+		{
+			"include": "#tag"
+		}
+	],
+	"repository": {
+		"keyword": {
+			"patterns": [
+				{
+					"name": "keyword.control.lkf",
+					"match": "\\b(if|else|for|of)\\b"
+				}
+			]
+		},
+		"string": {
+			"patterns": [
+				{
+					"name": "string.quoted.lkf string.quoted.double.lkf",
+					"begin": "\"",
+					"end": "\"",
+					"patterns": [
+						{
+							"include": "#escape"
+						}
+					]
+				},
+				{
+					"name": "string.quoted.lkf string.quoted.single.lkf",
+					"begin": "'",
+					"end": "'",
+					"patterns": [
+						{
+							"include": "#escape"
+						}
+					]
+				}
+			]
+		},
+		"escape": {
+			"patterns": [
+				{
+					"name": "constant.character.escape.lkf",
+					"match": "\\\\."
+				}
+			]
+		},
+		"javascript": {
+			"begin": "\\s*-",
+			"end": "\\s*$",
+			"contentName": "meta.embedded.block.js",
+			"patterns": []
+		},
+		"inline-js": {
+			"begin": "\\{",
+			"end": "\\}",
+			"contentName": "meta.embedded.inline.js",
+			"patterns": [
+				{
+					"include": "#js-object"
+				}
+			]
+		},
+		"js-object": {
+			"begin": "\\{",
+			"end": "\\}",
+			"patterns": [
+				{
+					"include": "#js-object"
+				}
+			]
+		},
+		"condition": {
+			"name": "meta.condition.lkf",
+			"begin": "^\\s*(if|else if|else)\\s*",
+			"end": "(.*)\\s*$",
+			"beginCaptures": {
+				"1": {
+					"name": "entity.keyword.lkf keyword.control.lkf"
+				}
+			},
+			"endCaptures": {
+				"1": {
+					"name": "entity.content.lkf meta.embedded.inline.js"
+				}
+			},
+			"patterns": []
+		},
+		"loop": {
+			"name": "meta.loop.lkf",
+			"begin": "^\\s*(for)",
+			"end": "\\s*(\\w*)\\s*(of)\\s*(.*)\\s*$",
+			"beginCaptures": {
+				"1": {
+					"name": "entity.keyword.lkf keyword.control.lkf"
+				}
+			},
+			"endCaptures": {
+				"1": {
+					"name": "entity.content.lkf variable.parameter.lkf"
+				},
+				"2": {
+					"name": "entity.keyword.lkf keyword.control.lkf"
+				},
+				"3": {
+					"name": "entity.content.lkf meta.embedded.inline.js"
+				}
+			},
+			"patterns": []
+		},
+		"container": {
+			"patterns": [
+				{
+					"name": "meta.container.lkf",
+					"begin": "^\\s*(container)",
+					"end": "\\s*$",
+					"beginCaptures": {
+						"1": {
+							"name": "entity.name.lkf storage.type.container.lkf"
+						}
+					},
+					"patterns": [
+						{
+							"name": "variable.parameter.lkf",
+							"match": "\\.([\\w-]+)\\b",
+							"captures": {
+								"1": {
+									"name": "entity.container.class.lkf"
+								}
+							}
+						},
+						{
+							"name": "variable.parameter.lkf",
+							"match": "\\b(left|center|right|top|middle|bottom|small|vertical|full|nowrap)\\b",
+							"captures": {
+								"1": {
+									"name": "entity.parameter.lkf"
+								}
+							}
+						},
+						{
+							"name": "meta.container.parameter.lkf",
+							"begin": "\\b(margin)\\b",
+							"end": "\\s(?!(\\s*-?\\d))",
+							"beginCaptures": {
+								"1": {
+									"name": "entity.parameter.lkf variable.parameter.lkf"
+								}
+							},
+							"patterns": [
+								{
+									"match": "\\s(-?\\d+)\\b",
+									"captures": {
+										"1": {
+											"name": "entity.number.lkf constant.numeric.lkf"
+										}
+									}
+								}
+							]
+						}
+					]
+				}
+			]
+		},
+		"tag": {
+			"name": "meta.tag.lkf",
+			"begin": "^\\s*([\\w-]+)",
+			"end": "\\s*$",
+			"beginCaptures": {
+				"1": {
+					"name": "entity.name.lkf",
+					"patterns": [
+						{
+							"include": "#tag-name"
+						}
+					]
+				}
+			},
+			"patterns": [
+				{
+					"include": "#inline-js"
+				},
+				{
+					"name": "meta.tag.attributes.lkf",
+					"begin": "\\(",
+					"end": "\\)",
+					"patterns": [
+						{
+							"include": "#tag-attribute"
+						}
+					]
+				},
+				{
+					"name": "variable.parameter.lkf",
+					"match": "##([\\w-]+)\\b",
+					"captures": {
+						"1": {
+							"name": "entity.id.global.lkf"
+						}
+					}
+				},
+				{
+					"name": "variable.parameter.lkf",
+					"match": "#([\\w-]+)\\b",
+					"captures": {
+						"1": {
+							"name": "entity.id.local.lkf"
+						}
+					}
+				},
+				{
+					"name": "variable.parameter.lkf",
+					"match": "\\.([\\w-]+)\\b",
+					"captures": {
+						"1": {
+							"name": "entity.class.lkf"
+						}
+					}
+				},
+				{
+					"match": "\\s([^}]*)(?!(.*\\}))",
+					"captures": {
+						"1": {
+							"name": "entity.content.lkf"
+						}
+					}
+				}
+			]
+		},
+		"tag-name": {
+			"patterns": [
+				{
+					"name": "storage.type.tag.lkf",
+					"match": "\\b(a|abbr|address|area|article|aside|audio|b|bdi|bdo|blockquote|body|br|button|canvas|caption|cite|code|col|colgroup|command|datalist|dd|del|details|dfn|div|dl|dt|em|embed|fieldset|figcaption|figure|footer|form|h1|h2|h3|h4|h5|h6|header|hr|html|i|iframe|img|input|ins|kbd|keygen|label|legend|li|main|map|mark|menu|meter|nav|object|ol|optgroup|option|output|p|param|pre|progress|q|rp|rt|ruby|s|samp|section|select|small|source|span|strong|sub|summary|sup|table|tbody|td|textarea|tfoot|th|thead|time|tr|track|u|ul|var|video|wbr)\\b"
+				},
+				{
+					"name": "support.type.tag.lkf",
+					"match": "\\b([\\w-]+)\\b"
+				}
+			]
+		},
+		"tag-attribute": {
+			"name": "meta.tag.attribute.lkf",
+			"begin": "\\b([\\w-]+)\\b",
+			"end": "(?=\\s*(\\w|\\)))",
+			"beginCaptures": {
+				"1": {
+					"name": "entity.attribute.name.lkf variable.parameter.lkf"
+				}
+			},
+			"patterns": [
+				{
+					"begin": "\\s*=\\s*",
+					"end": "(?=\\s|\\))",
+					"contentName": "entity.attribute.value.lkf",
+					"patterns": [
+						{
+							"include": "#inline-js"
+						},
+						{
+							"include": "#string"
+						}
+					]
+				}
+			]
+		}
+	},
+	"scopeName": "source.lkf"
+}
