@@ -1,0 +1,24 @@
+container vertical
+    container center middle margin 20
+        - const l = 1
+        container
+            input(type='number' title={'test' + 'test2'})
+            container right
+                button(type={'button'}) Click Here
+        p.test(att={true && false} style={'box-shadow: 10px 10px 10px black;'}) Un petit texte
+        container margin 10 -20
+            div {this.vartest}
+    container
+        TestComp##testglobal#testlocal(props={color: 'green', test: {first: this.vartest === 'Hi!', second: {hello: 'test'}}, next: 'next'})
+        TestComp.test(props={color: 'red'})
+        TestLoop
+    container
+        - const data = database.get('City', ['name'], {}, {one: true})
+        p {data.name}
+    container.test
+        table
+            for city of database.get('City')
+                tr
+                    td City
+                    td {city.name}
+                    td {city.population}
