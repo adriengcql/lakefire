@@ -1,0 +1,67 @@
+{
+  "name": "lakefire",
+  "version": "1.0.0",
+  "description": "",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "prepublish": "npm run build",
+    "build": "tsc",
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "webpack && node ./dev",
+    "dev": "browser-sync start --proxy localhost:9000 --files dev/public | nodemon"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/adriengcql/lakefire.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/adriengcql/lakefire/issues"
+  },
+  "homepage": "https://github.com/adriengcql/lakefire#readme",
+  "devDependencies": {
+    "@babel/core": "^7.4.0",
+    "@babel/preset-env": "^7.4.2",
+    "@types/node": "^11.11.4",
+    "babel-loader": "^8.0.5",
+    "babel-plugin-syntax-dynamic-import": "^6.18.0",
+    "css-loader": "^2.1.1",
+    "express": "^4.16.4",
+    "gulp": "^4.0.0",
+    "less": "^3.9.0",
+    "less-loader": "^4.1.0",
+    "node-loader": "^0.6.0",
+    "nodemon": "^1.18.10",
+    "raw-loader": "^2.0.0",
+    "style-loader": "^0.23.1",
+    "ts-loader": "^5.3.3",
+    "typescript": "^3.3.4000",
+    "uglifyjs-webpack-plugin": "^2.1.2",
+    "webpack": "^4.29.6",
+    "webpack-cli": "^3.3.0"
+  },
+  "dependencies": {
+    "@types/jsdom": "^12.2.3",
+    "@types/mongoose": "^5.3.24",
+    "@types/oniguruma": "^7.0.1",
+    "caller-source-location": "^1.0.0",
+    "jsdom": "^14.0.0",
+    "jsdom-global": "^3.0.2",
+    "mongoose": "^5.4.20",
+    "oniguruma": "^7.0.2",
+    "rxjs": "^6.4.0",
+    "vscode-textmate": "^4.1.0",
+    "ws": "^6.2.1"
+  },
+  "nodemonConfig": {
+    "ext": "js ts lkf css",
+    "ignore": [
+      "dev/public/*",
+      "dist/*",
+      "test/tokens.json"
+    ],
+    "exec": "tsc && echo. && echo. && echo. ------ Lakefire ------ && echo. && node ./dist/lakefire && echo. && echo. && echo. ------ Webpack ------ && echo. && webpack && echo. && echo. && echo. ------ Server ------ && echo. && node ./dev || exit 1"
+  }
+}
