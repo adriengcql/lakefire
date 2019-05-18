@@ -1,1 +1,5 @@
 src/
+test/
+test-local/
+dev/
+dist/

@@ -99,8 +99,21 @@ class Parser {
 
     parseContainer() {
         this.expect(TokenType.NAME);
-        const opts: any = { align: {} }
+        const opts: any = { classList: [], align: {} }
         let tok
+        while ((tok = this.accept(TokenType.CLASS)) || (tok = this.accept('entity.id.global.lkf')) || (tok = this.accept('entity.id.local.lkf'))) {
+            switch (tok.type) {
+                case 'entity.id.global.lkf':
+                    opts.globalId = tok.value
+                    break
+                case 'entity.id.local.lkf':
+                    opts.localId = tok.value
+                    break
+                case TokenType.CLASS:
+                    opts.classList.push(tok.value)
+                    break
+            }
+        }
         while (tok = this.accept(TokenType.PARAMETER)) {
             switch (tok.value) {
                 case 'margin':
@@ -115,6 +128,8 @@ class Parser {
                     opts[tok.value] = true
             }
         }
+        console.log(opts);
+
         return new LNode(NodeType.CONTAINER, opts)
     }
 
@@ -125,8 +140,6 @@ class Parser {
             margin.push(p.value)
         }
         const l = margin.length;
-        console.log(margin);
-
         return {
             top: margin[0],
             right: margin[1 % l],

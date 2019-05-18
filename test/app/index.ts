@@ -1,4 +1,4 @@
-import { Database } from '../../dist'
+import { Database } from '../../lib'
 
 export const database = new Database('localhost:9000')
 

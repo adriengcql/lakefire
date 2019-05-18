@@ -1,13 +1,10 @@
 import { parse } from './parser'
-import fs from 'fs'
+import fs from 'fs-extra'
 import path from 'path'
-import { LNode } from './nodeUtil';
 import { debug } from './helpers';
 require('jsdom-global')()
 
-const _path = path.resolve(process.cwd(), 'test/app')
-
-const components: { [name: string]: LNode } = {}
+const _path = path.resolve(process.cwd(), process.argv.length > 2 ? process.argv[2] : '')
 
 async function build(filePath: string) {
     if (fs.lstatSync(filePath).isDirectory()) {
@@ -15,17 +12,16 @@ async function build(filePath: string) {
             await build(path.resolve(filePath, p))
     }
     else if (path.extname(filePath) === '.lkf') {
-
         const input = fs.readFileSync(filePath, 'utf8')
         const output = await parse(input)
-        components[path.basename(filePath).replace(/\.lkf$/, '')] = output
-        fs.writeFileSync(filePath.replace(/\.lkf$/, '.json'), JSON.stringify(output))
+        fs.writeJSONSync(filePath.replace(/\.lkf$/, '.json'), output)
     }
 }
 
 async function buildApp() {
-    await build(_path)
-    fs.writeFileSync(path.resolve(_path, 'global.json'), JSON.stringify(components))
+    await fs.copySync(path.resolve(_path, 'app/assets'), path.resolve(_path, 'server/public'))
+    debug('Resources loaded')
+    await build(path.resolve(_path, 'app'))
 }
 
 buildApp().then(() => {

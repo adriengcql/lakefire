@@ -1,5 +1,4 @@
 const express = require('express');
-const fs = require('fs')
 
 const path = require('path');
 const database = require('./database');
@@ -12,12 +11,14 @@ const wss = new Websocket.Server({ server })
 
 app.use(express.static(path.join(__dirname, '/public')));
 
-// respond with "hello world" when a GET request is made to the homepage
 app.get('/', function (req, res) {
     res.sendFile('index.html');
 });
 
-const watcher = database.models.City.watch()
+const watchers = {}
+for (const model in database.models) {
+    watchers[model] = database.models[model].watch()
+}
 
 wss.on('connection', function (socket) {
     console.log('new user connected');
@@ -41,7 +42,7 @@ wss.on('connection', function (socket) {
             })
 
             if (!options.noUpdate) {
-                watcher.on('change', (event) => {
+                watchers[model].on('change', (event) => {
                     if (socket.readyState === 1 && event.operationType === 'insert') {
                         collection.findOne(where, keys.join(' '), function (err, item) {
                             if (item && item !== res) {
@@ -59,7 +60,7 @@ wss.on('connection', function (socket) {
             })
 
             if (!options.noUpdate) {
-                watcher.on('change', (event) => {
+                watchers[model].on('change', (event) => {
                     if (socket.readyState === 1 && event.operationType === 'insert') {
                         where._id = event.fullDocument._id;
                         collection.find(where, keys.join(' '), function (err, items) {

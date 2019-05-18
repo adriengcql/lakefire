@@ -1,27 +1,11 @@
 {
-  "name": "lakefire",
-  "version": "0.0.1",
-  "description": "",
-  "main": "lib/index.js",
-  "types": "lib/index.d.ts",
   "scripts": {
-    "prepublish": "npm run build",
-    "build": "tsc",
+    "postinstall": "npm link lakefire",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "start": "node ./test/server",
-    "dev": "browser-sync start --proxy localhost:9000 --files test/server/public/bundle.js | nodemon",
-    "init": "echo initializing lakefire project"
+    "build": "echo. ------ Lakefire ------ && echo. && lakefire build && echo. && echo. && echo. ------ Webpack ------ && echo. && webpack",
+    "start": "node ./server",
+    "dev": "browser-sync start --proxy localhost:9000 --files server/public/bundle.js | nodemon"
   },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/adriengcql/lakefire.git"
-  },
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/adriengcql/lakefire/issues"
-  },
-  "homepage": "https://github.com/adriengcql/lakefire#readme",
   "devDependencies": {
     "@babel/core": "^7.4.0",
     "@babel/preset-env": "^7.4.2",
@@ -44,13 +28,10 @@
     "webpack-cli": "^3.3.0"
   },
   "dependencies": {
-    "@types/fs-extra": "^5.1.0",
     "@types/jsdom": "^12.2.3",
     "@types/mongoose": "^5.3.24",
-    "@types/ncp": "^2.0.1",
     "@types/oniguruma": "^7.0.1",
     "caller-source-location": "^1.0.0",
-    "fs-extra": "^7.0.1",
     "jsdom": "^14.0.0",
     "jsdom-global": "^3.0.2",
     "mongoose": "^5.4.20",
@@ -63,14 +44,9 @@
   "nodemonConfig": {
     "ext": "js ts lkf css",
     "ignore": [
-      "test/server/public/*",
-      "dist/*",
-      "lib/*",
-      "test/tokens.json"
+      "server/public/*",
+      "dist/*"
     ],
-    "exec": "tsc && echo. && echo. && echo. ------ Lakefire ------ && echo. && node ./lib/lakefire ./test && echo. && echo. && echo. ------ Webpack ------ && echo. && webpack && echo. && echo. && echo. ------ Server ------ && echo. && node ./test/server || exit 1"
-  },
-  "bin": {
-    "lakefire": "bin/cmd.js"
+    "exec": "npm run build && echo. && echo. && echo. ------ Server ------ && echo. && node ./server || exit 1"
   }
 }

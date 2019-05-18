@@ -1,4 +1,4 @@
-import { Component, head } from '../../dist'
+import { Component, head } from '../../lib'
 import TestComp from './testComp/TestComp'
 import TestLoop from './testComp/TestLoop'
 import { database } from './'

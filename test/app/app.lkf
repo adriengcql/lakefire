@@ -2,10 +2,11 @@ container vertical
     container center middle margin 20
         - const l = 1
         container
+            img(src='logo.svg')
             input(type='number' title={'test' + 'test2'})
             container right
                 button(type={'button'}) Click Here
-        p.test(att={true && false} style={'box-shadow: 10px 10px 10px black;'}) Un petit texte
+        p.test(att={true && false} style={'box-shadow: 10px 10px 10px black;'}) Un petit texteasdf
         container margin 10 -20
             div {this.vartest}
     container
@@ -15,10 +16,20 @@ container vertical
     container
         - const data = database.get('City', ['name'], {}, {one: true})
         p {data.name}
-    container.test
+    container.test.hello
         table
             for city of database.get('City')
                 tr
                     td City
                     td {city.name}
                     td {city.population}
+    container
+        p Tesatadslfjh
+    container margin 5 20
+        container small
+            img.logo(src='./logo.svg')
+            div A PROPOS
+            div NOTRE OFFRE
+            div LIVRE BLANC
+        container middle right
+            div Social media

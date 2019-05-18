@@ -190,13 +190,13 @@ export class Component {
     private createElement(tag: string, opts: any) {
         const div = document.createElement(tag)
         if (tag !== 'div') {
-            div.classList.add(tag)
+            div.classList.add(this.styles[tag] || tag)
         }
         if (opts.classList && opts.classList.length) {
-            div.classList.add(opts.classList.map((c: string) => this.styles[c] || c))
+            div.classList.add(...opts.classList.map((c: string) => this.styles[c] || c))
         }
         for (const att in opts.attributes) {
-            div.setAttribute(att, opts.attributes[att])
+            div.setAttribute(att, this.evalExp(opts.attributes[att]))
         }
         if (opts.globalId) {
             div.id = opts.globalId
@@ -221,13 +221,7 @@ export class Component {
         div.classList.add('container')
 
         div.style.display = 'flex';
-        div.style.flexDirection = opts.vertical ? 'column' : 'row';
-
         div.style.flex = opts.small ? 'initial' : 'auto';
-        div.style.flexWrap = opts.nowrap ? 'nowrap' : 'wrap';
-        if (opts.full) {
-            div.style.height = '100%';
-        }
 
         if (opts.margin) {
             const { top, right, bottom, left } = opts.margin as { [name: string]: number }
@@ -242,7 +236,13 @@ export class Component {
             const v = opts.align.vertical || 'middle'
             const h = opts.align.horizontal || 'left'
             const childDiv = document.createElement('div');
+            childDiv.style.display = 'flex';
+            childDiv.style.flexDirection = opts.vertical ? 'column' : 'row';
             childDiv.style.flex = 'initial';
+            childDiv.style.flexWrap = opts.nowrap ? 'nowrap' : 'wrap';
+            if (opts.full) {
+                childDiv.style.height = '100%';
+            }
             childDiv.style.margin = 'auto';
             if (v === 'top') {
                 childDiv.style.marginTop = '0';
@@ -254,9 +254,15 @@ export class Component {
             } else if (h === 'right') {
                 childDiv.style.marginRight = '0';
             }
+
             this.renderChildren(childDiv, node.nodes)
             div.appendChild(childDiv)
         } else {
+            div.style.flexDirection = opts.vertical ? 'column' : 'row';
+            div.style.flexWrap = opts.nowrap ? 'nowrap' : 'wrap';
+            if (opts.full) {
+                div.style.height = '100%';
+            }
             this.renderChildren(div, node.nodes)
         }
         return div

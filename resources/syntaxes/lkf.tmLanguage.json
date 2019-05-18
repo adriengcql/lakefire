@@ -142,7 +142,7 @@
 							"match": "\\.([\\w-]+)\\b",
 							"captures": {
 								"1": {
-									"name": "entity.container.class.lkf"
+									"name": "entity.class.lkf"
 								}
 							}
 						},

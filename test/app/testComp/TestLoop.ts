@@ -1,4 +1,4 @@
-import { Component, head } from '../../../dist'
+import { Component, head } from '../../../lib'
 import { database } from '../'
 
 

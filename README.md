@@ -17,6 +17,7 @@ Use a simple and clear syntax to write your templates. (pug like)
 - Build in loops and conditions
 - Embedded javascript linked to your component
 - Containers for simple layout
+- Use observable inside template and refresh is trigger with new data
 
 ```
 container middle left margin 20
@@ -24,7 +25,7 @@ container middle left margin 20
     button.btn-light(title='title') Done
 ```
 
-## Build in live data connection
+## Build in live data connection (experimental)
 
 Stop fighting with REST endpoint, data fetching is made simplier
 - Socket connection to fetch data in Mongo via Moongoose : live data without effort
@@ -33,17 +34,21 @@ Stop fighting with REST endpoint, data fetching is made simplier
 
 ```
 container
-    for city of database.get('City')
-        table
+    table
+        for city of database.get('City')
             tr
                 td {city.name}
                 td {city.population}
 ```
 
+# Containers (experimental)
+
+Build layout directly on your template and keep CSS for styling.
+
 ## Full liberty
 
-Although usual features are simplified and automated, no limit is set to what you can do, just code as before
+Although usual features are simplified and automated, no limit is set to what you can do, just code as before.
 
 ## VSCode integration
 
-Coloring and completion for .lkf template
+Coloring and completion for .lkf template.
