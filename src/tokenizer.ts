@@ -14,6 +14,10 @@ export async function tokenize(input: string, tabWidth: number = 4): Promise<Tok
     let i = 1
     let ruleStack = null
     for (const line of input.split('\r\n')) {
+        if (!line.trim()) {
+            i++
+            continue
+        }
         const lineTokens: any = grammar.tokenizeLine(line, ruleStack)
         lineTokens.tokens = lineTokens.tokens.reduce((acc: any[], tok: any) => {
             const last = acc.length && acc[acc.length - 1]

@@ -4,7 +4,7 @@ import TestLoop from './testComp/TestLoop'
 import { database } from './'
 
 @head({
-    template: require('./app.json'),
+    template: require('./app.lkf'),
     components: { TestComp, TestLoop, database }
 })
 export default class App extends Component {

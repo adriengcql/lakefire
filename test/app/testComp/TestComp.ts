@@ -2,7 +2,7 @@ import { Component, head } from '../../../lib'
 
 
 @head({
-    template: require('./TestComp.json'),
+    template: require('./TestComp.lkf'),
     stylesheet: require('./TestComp.css')
 })
 export default class TestComp extends Component {

@@ -10,6 +10,7 @@ function nextColor(): string {
 }
 
 export function head(h: any) {
+    console.log(h.template, h.stylesheet)
     return function (constructor: any) {
         constructor.prototype.template = h.template
         constructor.prototype.importedComponents = h.components
@@ -54,8 +55,12 @@ export class Component {
     public props: any
 
     constructor(props?: any) {
+
         this.type = this.constructor.name;
         const self = this as any
+        console.log(this.constructor.prototype);
+        console.log(self.prototype);
+
         this.root = { ...self['template'] as LNode } || new LNode(NodeType.BLOCK);
         this.imports = self['importedComponents'] as { [name: string]: Component } || {}
         this.styles = self['stylesheet'] as any || {}

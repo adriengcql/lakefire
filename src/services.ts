@@ -75,6 +75,7 @@ class QueryObs extends Observable<any> {
 
 export class Database {
 
+
     socket: WebSocket
     requestStack: any[] = []
     queries: any[] = []

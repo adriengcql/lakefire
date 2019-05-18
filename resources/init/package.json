@@ -2,9 +2,9 @@
   "scripts": {
     "postinstall": "npm link lakefire",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "build": "echo. ------ Lakefire ------ && echo. && lakefire build && echo. && echo. && echo. ------ Webpack ------ && echo. && webpack",
+    "build": "webpack",
     "start": "node ./server",
-    "dev": "browser-sync start --proxy localhost:9000 --files server/public/bundle.js | nodemon"
+    "dev": "webpack-dev-server --open"
   },
   "devDependencies": {
     "@babel/core": "^7.4.0",
@@ -40,13 +40,5 @@
     "rxjs": "^6.4.0",
     "vscode-textmate": "^4.1.0",
     "ws": "^6.2.1"
-  },
-  "nodemonConfig": {
-    "ext": "js ts lkf css",
-    "ignore": [
-      "server/public/*",
-      "dist/*"
-    ],
-    "exec": "npm run build && echo. && echo. && echo. ------ Server ------ && echo. && node ./server || exit 1"
   }
 }

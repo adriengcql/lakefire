@@ -8,7 +8,7 @@ let fileid = 0
 export async function parse(input: string, options?: any) {
     const tokens = await tokenize(input)
     // for debug
-    fs.writeFileSync(path.join(__dirname, `../test/tokens${fileid++}.json`), JSON.stringify(tokens))
+    fs.writeFileSync(path.join(__dirname, `../test-local/tokens${fileid++}.json`), JSON.stringify(tokens))
     var parser = new Parser(tokens, options);
     var ast = parser.parse();
     return JSON.parse(JSON.stringify(ast));

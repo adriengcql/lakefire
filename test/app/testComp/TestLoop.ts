@@ -3,7 +3,7 @@ import { database } from '../'
 
 
 @head({
-    template: require('./TestLoop.json'),
+    template: require('./TestLoop.lkf'),
     components: { database }
 })
 export default class TestLoop extends Component {

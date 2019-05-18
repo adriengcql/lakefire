@@ -1,9 +1,14 @@
 const path = require('path');
+const webpack = require('webpack');
 
 module.exports = {
     mode: 'development',
     entry: './test/app/index.ts',
     devtool: 'inline-source-map',
+    devServer: {
+        contentBase: path.resolve(__dirname, 'test/server/public'),
+        hot: true
+    },
     module: {
         rules: [
             {
@@ -13,7 +18,7 @@ module.exports = {
             },
             {
                 test: /\.lkf$/i,
-                use: 'raw-loader',
+                use: path.resolve('./lib/loader'),
             },
             {
                 test: /global\.css$/,
@@ -29,6 +34,9 @@ module.exports = {
             }
         ]
     },
+    plugins: [
+        new webpack.HotModuleReplacementPlugin()
+    ],
     resolve: {
         extensions: ['.tsx', '.ts', '.js', '.css', '.json']
     },

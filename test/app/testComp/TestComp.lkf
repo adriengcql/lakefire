@@ -2,3 +2,5 @@ container margin 20
     div.test#div {'un test simple'}
     div {this.props.color}
     div {this.props.test}
+    div Je suis la
+    div et la je comprend plus rien
