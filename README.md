@@ -41,7 +41,7 @@ container
                 td {city.population}
 ```
 
-# Containers (experimental)
+## Containers (experimental)
 
 Build layout directly on your template and keep CSS for styling.
 

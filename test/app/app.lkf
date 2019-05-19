@@ -23,13 +23,3 @@ container vertical
                     td City
                     td {city.name}
                     td {city.population}
-    container
-        p Tesatadslfjh
-    container margin 5 20
-        container small
-            img.logo(src='./logo.svg')
-            div A PROPOS
-            div NOTRE OFFRE
-            div LIVRE BLANC
-        container middle right
-            div Social media

@@ -26,7 +26,34 @@ module.exports = {
             },
             {
                 test: /[^(global)]\.css$/,
-                use: ['style-loader', { loader: 'css-loader', options: { modules: true, localIdentName: '[name]__[local]___[hash:base64:5]' } }],
+                use: [
+                    'style-loader',
+                    { loader: 'css-loader', options: { modules: true, localIdentName: '[name]__[local]___[hash:base64:5]' } }
+                ]
+            },
+            {
+                test: /global\.(scss|sass)$/,
+                loader: ['style-loader', 'css-loader', 'sass-loader']
+            },
+            {
+                test: /[^(global)]\.(scss|sass)$/,
+                use: [
+                    'style-loader',
+                    { loader: 'css-loader', options: { modules: true, localIdentName: '[name]__[local]___[hash:base64:5]' } },
+                    'sass-loader'
+                ]
+            },
+            {
+                test: /global\.less$/,
+                loader: ['style-loader', 'css-loader', 'less-loader']
+            },
+            {
+                test: /[^(global)]\.less$/,
+                use: [
+                    'style-loader',
+                    { loader: 'css-loader', options: { modules: true, localIdentName: '[name]__[local]___[hash:base64:5]' } },
+                    'less-loader'
+                ]
             },
             {
                 test: /\.(png|svg|jpg|gif)$/,
