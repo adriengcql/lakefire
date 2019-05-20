@@ -2,7 +2,6 @@ container vertical
     container center middle margin 20
         - const l = 1
         container
-            img(src='logo.svg')
             input(type='number' title={'test' + 'test2'})
             container right
                 button(type={'button'}) Click Here
@@ -23,3 +22,11 @@ container vertical
                     td City
                     td {city.name}
                     td {city.population}
+    button(routerLink='test') Test
+    button(routerLink='hello') Hello
+    route /
+        div default route
+    route /test
+        div Un nouvelle route
+    route /hello
+        div Hello World

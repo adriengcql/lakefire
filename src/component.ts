@@ -1,5 +1,6 @@
 import { LNode, NodeType } from './nodeUtil'
 import { last, debug } from './helpers'
+import { Router } from './router'
 
 const colors: string[] = ['aqua', 'blue', 'fuchsia', 'gray', 'green',
     'lime', 'maroon', 'navy', 'olive', 'orange', 'purple', 'red',
@@ -10,7 +11,6 @@ function nextColor(): string {
 }
 
 export function head(h: any) {
-    console.log(h.template, h.stylesheet)
     return function (constructor: any) {
         constructor.prototype.template = h.template
         constructor.prototype.importedComponents = h.components
@@ -55,12 +55,8 @@ export class Component {
     public props: any
 
     constructor(props?: any) {
-
         this.type = this.constructor.name;
         const self = this as any
-        console.log(this.constructor.prototype);
-        console.log(self.prototype);
-
         this.root = { ...self['template'] as LNode } || new LNode(NodeType.BLOCK);
         this.imports = self['importedComponents'] as { [name: string]: Component } || {}
         this.styles = self['stylesheet'] as any || {}
@@ -158,6 +154,8 @@ export class Component {
                 return this.renderCondition(node)
             case NodeType.LOOP:
                 return this.renderLoop(node)
+            case NodeType.ROUTE:
+                return this.renderRoute(node)
             case NodeType.SCRIPT:
                 this.execJavascript(node.options.script)
                 return null
@@ -208,6 +206,12 @@ export class Component {
         }
         if (opts.localId) {
             this.elements[opts.localId] = div
+        }
+        if (opts.routerLink) {
+            div.addEventListener('click', () => {
+                Router.navigate(opts.routerLink)
+                this.refresh()
+            })
         }
         //div.style.background = nextColor();
         return div
@@ -309,6 +313,15 @@ export class Component {
         return null
     }
 
+    private renderRoute(node: LNode) {
+        const div = document.createElement('div')
+        if (node.options.route === location.pathname) {
+            this.renderChildren(div, node.nodes)
+            return Array.from(div.children)
+        }
+        return null
+    }
+
     private renderLoop(node: LNode) {
         const opts = node.options
         const div = document.createElement('div')
@@ -347,7 +360,6 @@ export class Component {
                 for (const v in proxy) {
                     const obs = proxy[v]
                     if (obs && obs.constructor && obs.constructor.name === 'QueryObs') {
-                        console.log('subscription : ', v);
                         obs.subscribe(() => {
                             if (this.mounted) {
                                 this.refresh()

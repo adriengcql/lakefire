@@ -7,6 +7,7 @@ export enum NodeType {
     COMPONENT = 'component',
     DATA = 'data',
     SCRIPT = 'script',
+    ROUTE = 'route',
     LOOP = 'loop',
     CONDITION = 'condition',
     IF = 'if',

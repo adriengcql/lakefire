@@ -40,7 +40,7 @@ export async function tokenize(input: string, tabWidth: number = 4): Promise<Tok
                 value: line.substring(t.startIndex, t.endIndex),
                 type: t.scopes.slice().reverse().find((s: string) => s.split('.')[0] === 'entity') || t.scopes[t.scopes.length - 1] || '',
                 scopes: t.scopes
-            })).filter((t: any) => t.value.search(/\w/) >= 0)
+            })).filter((t: any) => t.value.search(/\w|\//) >= 0)
         }
         tok.type = tok.tokens.length && tok.tokens[0].scopes.length > 1 && tok.tokens[0].scopes[1]
         tokens.push(tok)

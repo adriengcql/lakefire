@@ -12,6 +12,7 @@ export enum TokenType {
     CONTENT = 'entity.content.lkf',
     CLASS = 'entity.class.lkf',
     KEYWORD = 'entity.keyword.lkf',
+    ROUTE = 'meta.route.lkf',
 }
 
 

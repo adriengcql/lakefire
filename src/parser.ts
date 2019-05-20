@@ -91,6 +91,8 @@ class Parser {
                 return this.parseCondition()
             case TokenType.LOOP:
                 return this.parseLoop()
+            case TokenType.ROUTE:
+                return this.parseRoute()
             default:
                 this.error('INVALID_TOKEN', 'unexpected token', this.peek());
 
@@ -128,8 +130,6 @@ class Parser {
                     opts[tok.value] = true
             }
         }
-        console.log(opts);
-
         return new LNode(NodeType.CONTAINER, opts)
     }
 
@@ -170,6 +170,9 @@ class Parser {
                     if (nextTok) {
                         if (tok.value === 'props') {
                             opts.props = `{${nextTok.value}}`
+                        }
+                        else if (tok.value === 'routerLink') {
+                            opts.routerLink = nextTok.value
                         }
                         else {
                             opts.attributes[tok.value] = nextTok.scopes.includes('string.quoted.lkf') ? `'${nextTok.value}'` : nextTok.value
@@ -216,54 +219,10 @@ class Parser {
         return new LNode(NodeType.ELSE)
 
     }
-    // parseHAlign(h: string) {
-    //     const tok = this.accept(TokenType.KEYWORD)
-    //     const v = tok ? tok.value : 'top';
-    //     return new LNode(NodeType.ALIGN, { h, v });
-    // }
 
-    // parseVAlign(v: string) {
-    //     const tok = this.accept(TokenType.KEYWORD)
-    //     const h = tok ? tok.value : 'left';
-    //     return new LNode(NodeType.ALIGN, { h, v });
-    // }
-
-    // parseContainer(type: string) {
-    //     const opts: any = {};
-    //     let tok;
-    //     while (tok = this.accept(TokenType.KEYWORD)) {
-    //         opts[tok.value] = true;
-    //     }
-    //     return new LNode(NodeType.CONTAINER, opts)
-    // }
-
-    // parseHTML() {
-    //     const tok = this.expect(TokenType.HTML)
-    //     return new LNode(NodeType.HTML, { content: tok.value })
-    // }
-
-    // parseIdentifier() {
-    //     const tok = this.expect(TokenType.IDENTIFIER);
-    //     const keys = [];
-    //     let op;
-    //     let filters;
-    //     let options: any = {};
-    //     while (op = this.accept(TokenType.OPERATOR)) {
-    //         if (op.value === '.') {
-    //             const t = this.expect(TokenType.IDENTIFIER)
-    //             if (t.value === 'one') {
-    //                 options.one = true;
-    //             } else if (t.value === 'noUpdate') {
-    //                 options.noUpdate = true;
-    //             } else {
-    //                 keys.push(t.value)
-    //             }
-    //         } else if (op.value === '(') {
-    //             const t = this.expect(TokenType.OBJECT)
-    //             filters = t.value
-    //             this.expect(TokenType.OPERATOR)
-    //         }
-    //     }
-    //     return new LNode(NodeType.DATA, { model: tok.value, keys, filters, options })
-    // }
+    parseRoute() {
+        this.expect(TokenType.KEYWORD)
+        const route = this.expect(TokenType.CONTENT).value
+        return new LNode(NodeType.ROUTE, { route })
+    }
 };

@@ -38,7 +38,6 @@ class QueryObs extends Observable<any> {
         super((observer) => {
             //observer.next(this.data)
             this.emitter.on('data', (data: any) => {
-                console.log('test2', data);
                 observer.next(data)
             })
             this.emitter.on('error', (err) => {
@@ -54,7 +53,6 @@ class QueryObs extends Observable<any> {
     }
 
     send(data: any) {
-        console.log('test', data);
         if (Array.isArray(data)) {
             if (!this.data) {
                 this.data = []
@@ -104,8 +102,6 @@ export class Database {
             const srcQuery = this.queries[data.requestId]
             const collection = this.database[srcQuery.model]
             const obs = this.queriesObs[data.requestId]
-            console.log('new data', data.requestId, obs);
-
 
             if (data.err) {
                 console.error(data.err)
@@ -121,8 +117,6 @@ export class Database {
                 collection.insertMany(data.items)
                 obs.send(data.items)
             }
-            //console.log('database', database)
-
         }
     }
 

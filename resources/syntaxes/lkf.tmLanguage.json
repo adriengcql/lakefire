@@ -6,6 +6,9 @@
 			"include": "#javascript"
 		},
 		{
+			"include": "#route"
+		},
+		{
 			"include": "#condition"
 		},
 		{
@@ -86,6 +89,22 @@
 					"include": "#js-object"
 				}
 			]
+		},
+		"route": {
+			"name": "meta.route.lkf",
+			"begin": "^\\s*(route)\\s*",
+			"end": "((\\w|/)*)\\s*$",
+			"beginCaptures": {
+				"1": {
+					"name": "entity.keyword.lkf keyword.control.lkf"
+				}
+			},
+			"endCaptures": {
+				"1": {
+					"name": "entity.content.lkf string.unquoted.lkf"
+				}
+			},
+			"patterns": []
 		},
 		"condition": {
 			"name": "meta.condition.lkf",
