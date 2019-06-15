@@ -4,7 +4,8 @@ import { database } from '../'
 
 @head({
     template: require('./TestLoop.lkf'),
-    components: { database }
+    components: { database },
+    stylesheet: require('./TestLoop.scss')
 })
 export default class TestLoop extends Component {
     hello = 'variable test'

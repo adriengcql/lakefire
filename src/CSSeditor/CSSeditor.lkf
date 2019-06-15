@@ -1,0 +1,16 @@
+div.container
+    for ss of this.stylesheets
+        div.block
+            h4.title {ss.description}
+            div.rules
+                for rule of ss.rules
+                    h5 {rule.selector}
+                    div.rule(data-stylesheet={this.stylesheets.indexOf(ss)} data-rule={Object.entries(ss.rules).find((elt) => elt[1] === rule)[0]} data-selector={rule.selector})
+                        ul
+                            for property of rule.style.cssText.split(';').filter((p) => p)
+                                li.property
+                                    input.name(type='text' value={property.split(':')[0].trim()} spellcheck='false' readonly)
+                                    span :
+                                    input.value(type='text' value={property.split(':')[1].trim()} spellcheck='false' data-property={property.split(':')[0].trim()})
+    div.property(style='visibility: hidden')
+        span.value#tmp

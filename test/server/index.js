@@ -12,14 +12,8 @@ const wss = new Websocket.Server({ server })
 app.use(express.static(path.join(__dirname, '/public')));
 
 app.get('*', function (req, res) {
-    console.log(__dirname)
     res.sendFile(path.join(__dirname, '/public/index.html'));
 });
-
-// app.get('*', function (req, res) {
-//     console.log('wtf\n\n\n')
-//     res.redirect('/');
-// });
 
 const watchers = {}
 for (const model in database.models) {
@@ -81,8 +75,8 @@ wss.on('connection', function (socket) {
     });
 });
 
-server.listen(9000, function () {
-    console.log('server listening on port 9000');
+server.listen(3000, function () {
+    console.log('server listening on port 3000');
 });
 
 module.export = app;

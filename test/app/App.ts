@@ -5,6 +5,7 @@ import { database } from './'
 
 @head({
     template: require('./app.lkf'),
+    stylesheet: require('./app.css'),
     components: { TestComp, TestLoop, database }
 })
 export default class App extends Component {

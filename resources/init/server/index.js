@@ -11,7 +11,7 @@ const wss = new Websocket.Server({ server })
 
 app.use(express.static(path.join(__dirname, '/public')));
 
-app.get('/', function (req, res) {
+app.get('*', function (req, res) {
     res.sendFile('index.html');
 });
 
@@ -75,8 +75,8 @@ wss.on('connection', function (socket) {
     });
 });
 
-server.listen(9000, function () {
-    console.log('server listening on port 9000');
+server.listen(3000, function () {
+    console.log('server listening on port 3000');
 });
 
 module.export = app;

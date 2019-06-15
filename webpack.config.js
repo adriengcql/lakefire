@@ -1,13 +1,57 @@
 const path = require('path');
 const webpack = require('webpack');
+const sw = require('stylesheet-writer')
+const sockjs = require('sockjs')
+const find = require('find')
 
 module.exports = {
     mode: 'development',
-    entry: './test/app/index.ts',
-    devtool: 'inline-source-map',
+    entry: {
+        app: './test/app/index.ts',
+        devtools: './src/devtools.ts'
+    },
+    devtool: 'cheap-module-eval-source-map',
     devServer: {
         contentBase: path.resolve(__dirname, 'test/server/public'),
-        hot: true
+        hot: true,
+        historyApiFallback: {
+            index: 'index.dev.html',
+            rewrites: [
+                { from: /^\/$/, to: '/dev' }
+            ]
+        },
+        index: 'index.dev.html',
+        after: async function (app, server) {
+            while (typeof server.listeningApp === 'undefined') {
+                await new Promise((res) => setTimeout(res, 500))
+            }
+            const socket = sockjs.createServer({
+                sockjs_url: 'http://cdn.jsdelivr.net/sockjs/1.3.0/sockjs.min.js',
+                log: (severity, line) => {
+                    if (severity === 'error') {
+                        console.error(line);
+                    }
+                }
+            });
+            socket.on('connection', (connection) => {
+                console.log('Devtools connected');
+                const styles = {}
+                connection.on('data', async (msg) => {
+                    const { source, selector, property, value } = JSON.parse(msg)
+                    if (!styles[source]) {
+                        find.file(source, path.resolve(__dirname, 'test/app'), (files) => {
+                            if (files.length) {
+                                styles[source] = sw.open(files[0], { autosave: true })
+                                styles[source].writeProperty(selector, property, value)
+
+                            }
+                        })
+                    }
+                    styles[source].writeProperty(selector, property, value)
+                })
+            })
+            socket.installHandlers(server.listeningApp, { prefix: '/devtools' })
+        },
     },
     module: {
         rules: [
@@ -22,37 +66,37 @@ module.exports = {
             },
             {
                 test: /global\.css$/,
-                loader: ['style-loader', 'css-loader']
+                loader: ['style-loader', { loader: 'css-loader', options: { sourceMap: true } }]
             },
             {
                 test: /[^(global)]\.css$/,
                 use: [
                     'style-loader',
-                    { loader: 'css-loader', options: { modules: true, localIdentName: '[name]__[local]___[hash:base64:5]' } }
+                    { loader: 'css-loader', options: { sourceMap: true, modules: true, localIdentName: '[name]__[local]' } },
                 ]
             },
             {
                 test: /global\.(scss|sass)$/,
-                loader: ['style-loader', 'css-loader', 'sass-loader']
+                loader: ['style-loader', { loader: 'css-loader', options: { sourceMap: true } }, 'sass-loader?sourceMap']
             },
             {
                 test: /[^(global)]\.(scss|sass)$/,
                 use: [
                     'style-loader',
-                    { loader: 'css-loader', options: { modules: true, localIdentName: '[name]__[local]___[hash:base64:5]' } },
-                    'sass-loader'
+                    { loader: 'css-loader', options: { sourceMap: true, modules: true, localIdentName: '[name]__[local]' } },
+                    'sass-loader?sourceMap'
                 ]
             },
             {
                 test: /global\.less$/,
-                loader: ['style-loader', 'css-loader', 'less-loader']
+                loader: ['style-loader', { loader: 'css-loader', options: { sourceMap: true } }, 'less-loader?sourceMap']
             },
             {
                 test: /[^(global)]\.less$/,
                 use: [
                     'style-loader',
-                    { loader: 'css-loader', options: { modules: true, localIdentName: '[name]__[local]___[hash:base64:5]' } },
-                    'less-loader'
+                    { loader: 'css-loader', options: { sourceMap: true, modules: true, localIdentName: '[name]__[local]' } },
+                    'less-loader?sourceMap'
                 ]
             },
             {
@@ -62,13 +106,15 @@ module.exports = {
         ]
     },
     plugins: [
-        new webpack.HotModuleReplacementPlugin()
     ],
     resolve: {
         extensions: ['.tsx', '.ts', '.js', '.css', '.json']
     },
     output: {
-        filename: 'bundle.js',
+        filename: '[name].js',
         path: path.resolve(__dirname, 'test/server/public')
+    },
+    node: {
+        fs: 'empty'
     }
 };

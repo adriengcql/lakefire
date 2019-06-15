@@ -7,7 +7,8 @@ module.exports = {
     devtool: 'inline-source-map',
     devServer: {
         contentBase: path.resolve(__dirname, 'server/public'),
-        hot: true
+        hot: true,
+        historyApiFallback: true
     },
     module: {
         rules: [

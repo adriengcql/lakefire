@@ -24,6 +24,8 @@ container vertical
                     td {city.population}
     button(routerLink='test') Test
     button(routerLink='hello') Hello
+    container.fixed
+        p Test
     route /
         div default route
     route /test

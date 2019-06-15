@@ -63,6 +63,12 @@ export class Component {
         this.props = props || {}
     }
 
+    public destroy() {
+        if (this.html) {
+            this.html.replaceWith('')
+        }
+    }
+
     public mount(anchor: HTMLElement, options: any = {}) {
         this.root.options = options
 
@@ -87,18 +93,19 @@ export class Component {
         }
 
         this.state.forEach(v => {
+            const tmp = (this as any)[v];
             Object.defineProperty(this, v, {
                 get: function () {
                     return this['i' + v];
                 },
                 set: function (value) {
-
                     this['i' + v] = value
-                    if (!this.updating) {
+                    if (!this.updating && this.mounted) {
                         this.refresh()
                     }
                 }
             });
+            (this as any)['i' + v] = tmp
         })
         this.componentDidMount()
         this.mounted = true
@@ -192,10 +199,8 @@ export class Component {
 
     private createElement(tag: string, opts: any) {
         const div = document.createElement(tag)
-        if (tag !== 'div') {
-            div.classList.add(this.styles[tag] || tag)
-        }
         if (opts.classList && opts.classList.length) {
+            div.classList.add(...opts.classList)
             div.classList.add(...opts.classList.map((c: string) => this.styles[c] || c))
         }
         for (const att in opts.attributes) {
@@ -340,9 +345,7 @@ export class Component {
         if (!script) {
             return null
         }
-
         try {
-
             const exp = script.replace(/\b(let|const)\s/g, 'var ')
             const proxy = last(this.scopes)
             for (const v in proxy) {

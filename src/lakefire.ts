@@ -2,7 +2,6 @@ import { parse } from './parser'
 import fs from 'fs-extra'
 import path from 'path'
 import { debug } from './helpers';
-require('jsdom-global')()
 
 const _path = path.resolve(process.cwd(), process.argv.length > 2 ? process.argv[2] : '')
 
