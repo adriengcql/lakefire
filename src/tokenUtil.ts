@@ -1,4 +1,3 @@
-import { listenerCount } from "cluster";
 
 export enum TokenType {
     CONTAINER = 'meta.container.lkf',
@@ -6,6 +5,7 @@ export enum TokenType {
     CONDITION = 'meta.condition.lkf',
     LOOP = 'meta.loop.lkf',
     JAVASCRIPT = 'meta.embedded.block.js',
+    INLINE_JS = 'meta.embedded.inline.js',
     PARAMETER = 'entity.parameter.lkf',
     NUMBER = 'entity.number.lkf',
     NAME = 'entity.name.lkf',
@@ -13,6 +13,10 @@ export enum TokenType {
     CLASS = 'entity.class.lkf',
     KEYWORD = 'entity.keyword.lkf',
     ROUTE = 'meta.route.lkf',
+    GLOBAL_ID = 'entity.id.global.lkf',
+    LOCAL_ID = 'entity.id.local.lkf',
+    ATTRIBUTE_NAME = 'entity.attribute.name.lkf',
+    ATTRIBUTE_VALUE = 'entity.attribute.value.lkf'
 }
 
 

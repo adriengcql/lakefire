@@ -44,7 +44,7 @@
     "read-blob": "^1.1.0",
     "sass-loader": "^7.1.0",
     "style-loader": "^0.23.1",
-    "stylesheet-writer": "^1.0.0",
+    "stylesheet-writer": "^1.0.1",
     "ts-loader": "^5.3.3",
     "typescript": "^3.3.4000",
     "uglifyjs-webpack-plugin": "^2.1.2",

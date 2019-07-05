@@ -16,11 +16,7 @@ module.exports = {
         hot: true,
         historyApiFallback: {
             index: 'index.dev.html',
-            rewrites: [
-                { from: /^\/$/, to: '/dev' }
-            ]
         },
-        index: 'index.dev.html',
         after: async function (app, server) {
             while (typeof server.listeningApp === 'undefined') {
                 await new Promise((res) => setTimeout(res, 500))

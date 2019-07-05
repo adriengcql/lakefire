@@ -24,6 +24,7 @@ container vertical
                     td {city.population}
     button(routerLink='test') Test
     button(routerLink='hello') Hello
+    // hello un commentaire
     container.fixed
         p Test
     route /

@@ -2,7 +2,9 @@
 	"$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
 	"name": "Lakefire",
 	"patterns": [
-		{},
+		{
+			"include": "comment"
+		},
 		{
 			"include": "#javascript"
 		},
@@ -26,6 +28,11 @@
 		}
 	],
 	"repository": {
+		"comment": {
+			"begin": "\\s*//",
+			"end": "$",
+			"name": "comment.line"
+		},
 		"keyword": {
 			"patterns": [
 				{
@@ -37,7 +44,7 @@
 		"string": {
 			"patterns": [
 				{
-					"name": "string.quoted.lkf string.quoted.double.lkf",
+					"contentName": "string.quoted.lkf string.quoted.double.lkf",
 					"begin": "\"",
 					"end": "\"",
 					"patterns": [
@@ -47,7 +54,7 @@
 					]
 				},
 				{
-					"name": "string.quoted.lkf string.quoted.single.lkf",
+					"contentName": "string.quoted.lkf string.quoted.single.lkf",
 					"begin": "'",
 					"end": "'",
 					"patterns": [

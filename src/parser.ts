@@ -103,12 +103,12 @@ class Parser {
         this.expect(TokenType.NAME);
         const opts: any = { classList: [], align: {} }
         let tok
-        while ((tok = this.accept(TokenType.CLASS)) || (tok = this.accept('entity.id.global.lkf')) || (tok = this.accept('entity.id.local.lkf'))) {
+        while ((tok = this.accept(TokenType.CLASS)) || (tok = this.accept(TokenType.GLOBAL_ID)) || (tok = this.accept(TokenType.LOCAL_ID))) {
             switch (tok.type) {
-                case 'entity.id.global.lkf':
+                case TokenType.GLOBAL_ID:
                     opts.globalId = tok.value
                     break
-                case 'entity.id.local.lkf':
+                case TokenType.LOCAL_ID:
                     opts.localId = tok.value
                     break
                 case TokenType.CLASS:
@@ -154,19 +154,19 @@ class Parser {
         const opts: any = { tag: tag.value, id: this.nextId(), classList: [], attributes: {}, props: '{}' };
 
         let tok;
-        while ((tok = this.accept(TokenType.CLASS)) || (tok = this.accept('entity.attribute.name.lkf')) || (tok = this.accept('entity.id.global.lkf')) || (tok = this.accept('entity.id.local.lkf'))) {
+        while ((tok = this.accept(TokenType.CLASS)) || (tok = this.accept(TokenType.ATTRIBUTE_NAME)) || (tok = this.accept(TokenType.GLOBAL_ID)) || (tok = this.accept(TokenType.LOCAL_ID))) {
             switch (tok.type) {
-                case 'entity.id.global.lkf':
+                case TokenType.GLOBAL_ID:
                     opts.globalId = tok.value
                     break
-                case 'entity.id.local.lkf':
+                case TokenType.LOCAL_ID:
                     opts.localId = tok.value
                     break
                 case TokenType.CLASS:
                     opts.classList.push(tok.value)
                     break
-                case 'entity.attribute.name.lkf':
-                    const nextTok = this.accept('entity.attribute.value.lkf')
+                case TokenType.ATTRIBUTE_NAME:
+                    const nextTok = this.accept(TokenType.ATTRIBUTE_VALUE)
                     if (nextTok) {
                         if (tok.value === 'props') {
                             opts.props = `{${nextTok.value}}`
@@ -187,7 +187,7 @@ class Parser {
         if (tok = this.accept(TokenType.CONTENT)) {
             opts.content = `'${tok.value}'`
         }
-        else if (tok = this.accept('meta.embedded.inline.js')) {
+        else if (tok = this.accept(TokenType.INLINE_JS)) {
             opts.content = tok.value
         }
         return new LNode(nodeType, opts)

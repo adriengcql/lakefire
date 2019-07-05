@@ -14,11 +14,11 @@ let editor: CSSeditor
 
     if (open) {
         editor.destroy()
-        iframe.style.left = '0'
+        iframe.style.width = '100%'
         open = false
     }
     else {
-        iframe.style.left = '300px'
+        iframe.style.width = 'calc(100% - 300px)'
         editor = new CSSeditor({ socket: devSocket, document: iframe && iframe.contentDocument })
         const div = document.createElement('div')
         document.body.prepend(div)

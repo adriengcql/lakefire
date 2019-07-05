@@ -1,5 +1,12 @@
 # Lakefire
 
+## Quick Start
+
+```
+> npm install --save-dev lakefire
+> lakefire init
+```
+
 ## Component based
 
 Develop faster with components and enjoy their simplicity (similar to Angular or React)
