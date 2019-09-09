@@ -7,6 +7,8 @@
 > lakefire init
 ```
 
+Install VScode `Lakefire` extansion for language support
+
 ## Component based
 
 Develop faster with components and enjoy their simplicity (similar to Angular or React)

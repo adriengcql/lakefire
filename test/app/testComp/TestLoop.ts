@@ -1,12 +1,12 @@
-import { Component, head } from '../../../lib'
-import { database } from '../'
-
-
-@head({
-    template: require('./TestLoop.lkf'),
-    components: { database },
-    stylesheet: require('./TestLoop.scss')
-})
+import { Component } from '../../../lib'
+import * as path from 'path'
+require('./TestLoop.lkf')
+require('./TestLoop.scss')
+// @head({
+//     template: path.resolve(__dirname, './TestLoop.lkf'),
+//     components: {},
+//     stylesheet: require('./TestLoop.scss')
+// })
 export default class TestLoop extends Component {
     hello = 'variable test'
 

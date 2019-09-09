@@ -10,7 +10,6 @@ div.container
                             for property of rule.style.cssText.split(';').filter((p) => p)
                                 li.property
                                     input.name(type='text' value={property.split(':')[0].trim()} spellcheck='false' readonly)
-                                    span :
                                     input.value(type='text' value={property.split(':')[1].trim()} spellcheck='false' data-property={property.split(':')[0].trim()})
     div.property(style='visibility: hidden')
         span.value#tmp

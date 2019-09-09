@@ -1,10 +1,11 @@
-import { Component, head } from '../../../lib'
-
-
-@head({
-    template: require('./TestComp.lkf'),
-    stylesheet: require('./TestComp.css')
-})
+import { Component } from '../../../lib'
+import * as path from 'path'
+require('./TestComp.lkf')
+require('./TestComp.css')
+// @head({
+//     template: path.resolve(__dirname, './TestComp.lkf'),
+//     stylesheet: require('./TestComp.css')
+// })
 export default class TestComp extends Component {
 
     componentDidMount() {

@@ -1,22 +1,20 @@
-import { Component, head } from '../component'
+import { Component } from '../'
 import { fromSource } from 'convert-source-map'
 
-@head({
-    template: require('./CSSeditor.lkf'),
-    stylesheet: require('./CSSeditor.scss')
-})
+require('./CSSeditor.lkf')
+require('./CSSeditor.scss')
 export default class CSSeditor extends Component {
 
     stylesheets: any[] = []
 
     componentWillMount() {
         const doc = this.props.document
-        console.log(doc.styleSheets)
+        console.log(doc.styleSheets);
+
         if (doc.body.children[1]) {
             const app = (doc.body.children[1] as HTMLElement)
             app.style.marginLeft = '300px'
             for (const ss of Array.from(doc.styleSheets) as any[]) {
-                console.log(ss);
                 const tmp = ss.rules.length && ss.rules[0].selectorText.match(/\.([a-zA-Z0-9\-]+)__/)
                 ss.description = tmp ? tmp['1'] : ''
                 if (ss.description === 'CSSeditor') {
@@ -30,8 +28,6 @@ export default class CSSeditor extends Component {
                         const reader = new FileReader();
                         reader.onload = () => {
                             const s: any = fromSource(reader.result as string)
-                            console.log(s);
-
                             ss.source = s && s.toObject().file;
                         }
                         reader.readAsText(blb);

@@ -52,13 +52,13 @@ module.exports = {
     module: {
         rules: [
             {
-                test: /\.tsx?$/,
-                use: 'ts-loader',
+                test: /\.ts$/,
+                use: ['ts-loader', path.resolve('./lib/componentLoader')],
                 exclude: /node_modules/
             },
             {
                 test: /\.lkf$/i,
-                use: path.resolve('./lib/loader'),
+                use: path.resolve('./lib/templateLoader'),
             },
             {
                 test: /global\.css$/,
@@ -104,13 +104,14 @@ module.exports = {
     plugins: [
     ],
     resolve: {
-        extensions: ['.tsx', '.ts', '.js', '.css', '.json']
+        extensions: ['.ts', '.js', '.lkf', '.css', '.json']
     },
     output: {
         filename: '[name].js',
         path: path.resolve(__dirname, 'test/server/public')
     },
     node: {
-        fs: 'empty'
+        fs: 'empty',
+        __dirname: true
     }
 };

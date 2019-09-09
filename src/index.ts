@@ -1,5 +1,6 @@
-import { Component, head } from './component';
+import { Component, components } from './component';
 import { LNode } from './nodeUtil';
 import { Database } from './services'
+import { Router } from './router';
 
-export { Component, LNode, head, Database }
+export { Component, LNode, components, Database, Router }

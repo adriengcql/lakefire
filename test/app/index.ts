@@ -1,10 +1,21 @@
-import { Database } from '../../lib'
-
-export const database = new Database('localhost:3000')
+import { Database, Router } from '../../lib'
+import App from './App'
 
 require('./_global.scss')
 
-import App from './App'
+declare global {
+    interface Window {
+        app: App
+        router: Router
+        database: Database
+    }
+    const app: App
+    const router: Router
+    const database: Database
+}
 
-const app = new App()
-app.mount(document.getElementById('app') as HTMLElement)
+window.database = new Database('localhost:3000')
+window.app = new App()
+window.router = new Router(app)
+
+app.mount(document.getElementById('app') as HTMLElement, router)

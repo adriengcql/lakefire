@@ -2,7 +2,7 @@ container vertical
     container center middle margin 20
         - const l = 1
         container
-            input(type='number' title={'test' + 'test2'})
+            input.input(type='number' title={'test' + 'test2'})
             container right
                 button(type={'button'}) Click Here
         p.test(att={true && false} style={'box-shadow: 10px 10px 10px black;'}) Un petit texteasdf

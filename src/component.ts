@@ -1,6 +1,8 @@
 import { LNode, NodeType } from './nodeUtil'
 import { last, debug } from './helpers'
-import { Router } from './router'
+import { Router } from '.';
+import * as path from 'path'
+
 
 const colors: string[] = ['aqua', 'blue', 'fuchsia', 'gray', 'green',
     'lime', 'maroon', 'navy', 'olive', 'orange', 'purple', 'red',
@@ -10,7 +12,7 @@ function nextColor(): string {
     return colors[++colorIndex % colors.length]
 }
 
-export function head(h: any) {
+export function components(h: any) {
     return function (constructor: any) {
         constructor.prototype.template = h.template
         constructor.prototype.importedComponents = h.components
@@ -40,8 +42,9 @@ export class Component {
     componentDidMount(): void { }
     componentWillUpdate(): void { }
     componentDidUpdate(): void { }
+    protected initHMR(): void { }
     private type: string;
-    private root: LNode
+    protected root: LNode
     private imports: any
     private children: { [id: string]: { anchor: HTMLElement, component: Component, options: any, props: any } } = {}
     private scopes: any[] = []
@@ -49,6 +52,7 @@ export class Component {
     private state: Set<string> = new Set<string>()
     private mounted = false
     private updating = false
+    private router: Router | undefined
     public elements: { [id: string]: HTMLElement | undefined } = {}
     public components: { [id: string]: Component } = {}
     public html: HTMLElement | undefined
@@ -61,6 +65,7 @@ export class Component {
         this.imports = self['importedComponents'] as { [name: string]: Component } || {}
         this.styles = self['stylesheet'] as any || {}
         this.props = props || {}
+        this.initHMR()
     }
 
     public destroy() {
@@ -69,8 +74,9 @@ export class Component {
         }
     }
 
-    public mount(anchor: HTMLElement, options: any = {}) {
+    public mount(anchor: HTMLElement, router: Router, options: any = {}) {
         this.root.options = options
+        this.router = router
 
         this.componentWillMount()
         this.html = this.render() as HTMLElement
@@ -82,7 +88,7 @@ export class Component {
         for (const child of Object.values(this.children)) {
             const { localId, tag } = child.options
             delete child.options.localId
-            child.component.mount(child.anchor, child.options)
+            child.component.mount(child.anchor, this.router, child.options)
             if (localId) {
                 this.components[localId] = child.component
                 this.elements[localId] = child.component.html
@@ -112,6 +118,8 @@ export class Component {
     }
 
     public refresh(props?: any) {
+        console.log('refresh');
+
         this.props = props || this.props
         this.updating = true
         this.componentWillUpdate()
@@ -201,7 +209,7 @@ export class Component {
         const div = document.createElement(tag)
         if (opts.classList && opts.classList.length) {
             div.classList.add(...opts.classList)
-            div.classList.add(...opts.classList.map((c: string) => this.styles[c] || c))
+            div.classList.add(...opts.classList.map((c: string) => this.styles[c]).filter((s: string) => s))
         }
         for (const att in opts.attributes) {
             div.setAttribute(att, this.evalExp(opts.attributes[att]))
@@ -214,8 +222,9 @@ export class Component {
         }
         if (opts.routerLink) {
             div.addEventListener('click', () => {
-                Router.navigate(opts.routerLink)
-                this.refresh()
+                if (this.router) {
+                    this.router.navigate(opts.routerLink)
+                }
             })
         }
         //div.style.background = nextColor();

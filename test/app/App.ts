@@ -1,13 +1,16 @@
-import { Component, head } from '../../lib'
+import { Component, LNode } from '../../lib'
 import TestComp from './testComp/TestComp'
 import TestLoop from './testComp/TestLoop'
-import { database } from './'
+import * as path from 'path'
 
-@head({
-    template: require('./app.lkf'),
-    stylesheet: require('./app.css'),
-    components: { TestComp, TestLoop, database }
-})
+
+require('./app.lkf')
+require('./app.css')
+// @head({
+//     template: path.resolve(__dirname, 'app.lkf'),
+//     stylesheet: require('./app.css'),
+//     components: { TestComp, TestLoop }
+// })
 export default class App extends Component {
 
     vartest: string = 'Hello there'
