@@ -24,11 +24,10 @@ container middle left margin 20
     button.btn-light(title='title') Done
 ```
 
-## Build in live data connection
+## Built in live data connection
 
-Stop fighting with REST endpoint, data fetching is made simplier
-- Socket connection to fetch data in Mongo via Moongoose : live data without effort
-- Simple request syntax on client side : get only the data you need, no less, no more (fields are compiled automatically)
+- Socket connection to fetch data in Mongo via Moongoose: live data without effort
+- Simple request syntax on client side: get only the data you need, no less, no more (fields are compiled automatically)
 - Powerful cache and request building to get your data faster
 
 ```
@@ -40,10 +39,6 @@ container
                 td {city.population}
 ```
 
-## Full liberty
-
-Although usual features are simplified and automated, no limit is set to what you can do, just code as before
-
 ## VSCode integration
 
-Coloring and completion for .lkf template
+Syntax highlight and auto completion for .lkf template
